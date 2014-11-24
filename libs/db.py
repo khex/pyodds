@@ -23,7 +23,7 @@ db = client['odds_test']
 
 def get_xeid(xeid):
     try:
-        temp = db.matchess.find_one({'xeid': xeid})
+        temp = db.matches.find_one({'xeid': xeid})
         #  that return None if Exception
         return True if temp is not None else False
     except Exception:
