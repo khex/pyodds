@@ -23,6 +23,7 @@ from libs.tablerows import table, rows
 from libs.odds import get_odds
 from libs.builder import builder
 from libs.logger import log_main
+from libs.db import get_xeid, save_to_db
 
 
 seas = {'14/15': '2014-2015', '13/14': '2013-2014', '12/13': '2012-2013',
@@ -42,9 +43,9 @@ if args['hist'] is True:
         raise Exception('First page is bigger than last!')
 
     #  check if Mongodb is avaliable
-    if not mongo_avaliable():
-        raise Exception('MongoDB is not avaliable!')
-        #  pymongo.errors.ConnectionFailure
+    #  if not mongo_avaliable():
+    #    raise Exception('MongoDB is not avaliable!')
+    #       pymongo.errors.ConnectionFailure
 
     ###########################
     #   scrap results pages   #
@@ -61,32 +62,38 @@ if args['hist'] is True:
 
         if tags_list is not None:
 
+            
             ###################
             #   row by rows   #
             ###################
             for y, tag_arr in enumerate(tags_list):
-                """
-                don'd forget check_xeid in db
-                """
                 seas_type, xeid, bs4_tag = tag_arr
-                #  defining the 'match' dict()
-                match = rows(bs4_tag)
+                
 
-                if match is not None:
-                    match['season'] = season
-                    match['type'] = seas_type
-                    match['xeid'] = xeid
-                    bet_odd = get_odds(match['xeid'], match['xhash'])
+                ###################
+                #   check xeid    #
+                ###################
+                if get_xeid(xeid) is True:
+                    text = 'Xeid: %s exist' % xeid
+                    log_main.info(text)
+                else:                 
+                    match = rows(bs4_tag)
+                    if match is not None:
+                        match['season'] = season
+                        match['type'] = seas_type
+                        match['xeid'] = xeid
+                        bet_odd = get_odds(match['xeid'], match['xhash'])
 
-                    if bet_odd is not None:
-                        match['line'], match['hcap'], match['totl'] = bet_odd
-                        #   build the Match
-                        m = builder(match)
+                        if bet_odd is not None:
+                            match['line'], match['hcap'], match['totl'] = bet_odd
+                            #   build the Match
+                            m = builder(match)
 
-                        if m is not None:
-                            #  change to log_main() or colorise
-                            save_to_mongo(m)
-                            log_main('%s %s %s %s SAVED', (season, x, y, m['xeid']))
+                            if m is not None:
+                                res = save_to_db(m)
+                                if res is not None:
+                                    txt = '%s %s %s %s SAVED' % (season, x, y, m['xeid'])
+                                    log_main(txt)
 
 #  last results
 else:

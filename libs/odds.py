@@ -2,7 +2,7 @@ import json
 import requests
 import multiprocessing as mp
 from bs4 import BeautifulSoup
-from delta_odds.libs.logger import log_odds
+from logger import log_odds
 
 
 pref = 'http://fb.oddsportal.com/feed/match/'
