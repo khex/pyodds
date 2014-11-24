@@ -32,8 +32,8 @@ def get_xeid(xeid):
 
 def save_to_db(match):
     try:
-        db.matches.save('smth')
+        db.matches.save(match)
         xeid = match['xeid']
-        return db.matches.findOne({'xeid': xeid})
+        return db.matches.find_one({'xeid': xeid})
     except Exception:
         log_db.exception('Can not save to db')

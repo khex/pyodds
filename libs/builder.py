@@ -177,7 +177,7 @@ def builder(mdata):
             sport='basketball',
             league='NBA',
             season=mdata['season'],
-            type=mdata['tipe'],
+            type=mdata['type'],
             xeid=mdata['xeid'],
             datetime=datetime,
             home=home,

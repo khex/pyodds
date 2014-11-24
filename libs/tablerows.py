@@ -139,19 +139,35 @@ def rows(tr):
             log_rows.exception('page => xhash')
 
         '''
-        <p class="result">
-           [0] <span class="bold">Final result </span>
-           [1] <strong>109:108&nbsp;OT&nbsp;(99:99)</strong>
-           [2]  (27:25, 17:25, 21:25, 30:20, 8:5)
-        </p>
+        <div id="event-status">
+            <p class="result:
+            ">
+               [0]  <span class="bold">Final result </span>
+               [1]  <strong>109:108&nbsp;OT&nbsp;(99:99)</strong>
+               [2]   (27:25, 17:25, 21:25, 30:20, 8:5)
+            </p>
+        </div>
+        <div id="event-status">
+            <p class="result-alert">
+                <span class="bold">Canceled</span>
+            </p>
+        </div>
         '''
-        status = borshch.find(id='event-status')
 
         """ score """
         try:
-            match['score'] = [int(x) for x in str(status.strong.text).split(' ')[0].split(':')]
-            match['res_box'] = str(status.p.contents[2]).replace('(', '').replace(')', '').lstrip()
-            match['ot'] = False if len(match['res_box'].split(', ')) == 4 else True
+            status = borshch.find(id='event-status')
+            temp = status.find('p').get('class')[0] 
+            if temp == 'result':               
+                match['score'] = [int(x) for x in str(status.strong.text).split(' ')[0].split(':')]
+                match['res_box'] = str(status.p.contents[2]).replace('(', '').replace(')', '').lstrip()
+                match['ot'] = False if len(match['res_box'].split(', ')) == 4 else True
+            elif temp == 'result-alert':
+                log_rows.error('Result Alert (match was canseled)')
+                return None
+            else:
+                log_rows.error('Strange page.score error')
+                return None
         except Exception:
             log_rows.exception('page => score')
 

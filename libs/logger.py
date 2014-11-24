@@ -12,7 +12,7 @@ LOGGER = {
     },
     'handlers': {
         'consoleHandler': {
-            'level': 'WARNING',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },

@@ -3,11 +3,11 @@
 Odds portal NBA scrapper
 
 Usage:
-    scrap.py hist -s <season> [-f <first>] [-l <last>]
-    scrap.py last [-l <last>]
-    scrap.py -d | --debug
-    scrap.py -v | --version
-    scrap.py -h | --help
+    main.py hist -s <season> [-f <first>] [-l <last>]
+    main.py last [-l <last>]
+    main.py -d | --debug
+    main.py -v | --version
+    main.py -h | --help
 
 Options:
     -s --season         Season like '13/14'
@@ -50,7 +50,7 @@ if args['hist'] is True:
     ###########################
     #   scrap results pages   #
     ###########################
-    for x in xrange(first_page, last_page):
+    for x in range(first_page, last_page):
 
         log_main.info('Start season %s from %s to %s page', season, first_page, last_page)
         """
@@ -61,22 +61,24 @@ if args['hist'] is True:
         tags_list = table(season, x)
 
         if tags_list is not None:
-
-            
+            y = 0
             ###################
             #   row by rows   #
             ###################
             for y, tag_arr in enumerate(tags_list):
                 seas_type, xeid, bs4_tag = tag_arr
                 
-
                 ###################
                 #   check xeid    #
                 ###################
                 if get_xeid(xeid) is True:
                     text = 'Xeid: %s exist' % xeid
-                    log_main.info(text)
-                else:                 
+                    print(text)
+                else:
+
+                    #######################
+                    #   match from tags   #
+                    #######################
                     match = rows(bs4_tag)
                     if match is not None:
                         match['season'] = season
@@ -93,7 +95,7 @@ if args['hist'] is True:
                                 res = save_to_db(m)
                                 if res is not None:
                                     txt = '%s %s %s %s SAVED' % (season, x, y, m['xeid'])
-                                    log_main(txt)
+                                    log_main.info(txt)
 
 #  last results
 else:
