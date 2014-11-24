@@ -1,9 +1,7 @@
 import datetime
-
 import requests
 from bs4 import BeautifulSoup
-
-from delta_odds.logger import log_rows, log_table
+import requests import log_rows, log_table
 
 
 #  http://stackoverflow.com/questions/9264763

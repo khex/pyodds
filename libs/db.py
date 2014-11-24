@@ -1,4 +1,4 @@
-from delta_odds.logger import log_db
+from delta_odds.libs.logger import log_db
 from pymongo import MongoClient
 from pymongo import Connection
 import pymongo
@@ -17,15 +17,25 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['odds_test']
 #  collection = db['test-collection']
 #  db.drop_collection('matches')
-
-
-def db_avaliable():
-    return True
+#
+#  def db_avaliable():
+#    return True
 
 
 def get_xeid(xeid):
-    pass
+	try:
+		tmp = db.matchess.find_one({'xeid': match[xeid]})
+		#  that return None if Exception
+		return True if tml is not None else False
+	except Exception:
+		log_db('Can not get xeid from db')
+
 
 def save_to_db(match):
-    db.matches.save(match)
-    print db.matchess.find_one({'xeid': match['xeid']})
+	try:
+		db.matches.save(match)
+    	xeid = match['xeid']
+    	resp = db.matchess.find_one({'xeid': xeid})
+    	return resp
+	except Exception:
+		log_db('Can not get xeid from db')

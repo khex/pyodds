@@ -1,4 +1,4 @@
-from delta_odds.logger import log_db
+from delta_odds.libs.logger import log_db
 
 #  do 2009/2010
 nba_teams = [

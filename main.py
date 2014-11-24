@@ -22,7 +22,7 @@ from docopt import docopt
 from libs.tablerows import table, rows
 from libs.odds import get_odds
 from libs.builder import builder
-from logger import log_main
+from libs.logger import log_main
 
 
 seas = {'14/15': '2014-2015', '13/14': '2013-2014', '12/13': '2012-2013',
@@ -46,14 +46,12 @@ if args['hist'] is True:
         raise Exception('MongoDB is not avaliable!')
         #  pymongo.errors.ConnectionFailure
 
-    #   scrap results pages
+    ###########################
+    #   scrap results pages   #
+    ###########################
     for x in xrange(first_page, last_page):
 
         log_main.info('Start season %s from %s to %s page', season, first_page, last_page)
-        print "---------------------------------------"
-        print "| Scrap season %s from %s to %s page |" % (season, first_page, last_page)
-        print "---------------------------------------\n"
-
         """
         get html from remote page
         shoul return list of tags like
@@ -62,7 +60,11 @@ if args['hist'] is True:
         tags_list = table(season, x)
 
         if tags_list is not None:
-            for tag_arr in tags_list:
+
+            ###################
+            #   row by rows   #
+            ###################
+            for y, tag_arr in enumerate(tags_list):
                 """
                 don'd forget check_xeid in db
                 """
@@ -82,23 +84,10 @@ if args['hist'] is True:
                         m = builder(match)
 
                         if m is not None:
+                            #  change to log_main() or colorise
                             save_to_mongo(m)
+                            log_main('%s %s %s %s SAVED', (season, x, y, m['xeid']))
 
-        '''
-                        #  m is Exception
-                        else:
-                            pass
-                #  odds Exception
-                else:
-                    pass
-            #  match is Exception
-            else:
-                pass
-        #  tags_list is Exception
-        else:
-            pass
-        '''
-
-#  Not 'hist'
+#  last results
 else:
     print 'Woked ELSE statement'
