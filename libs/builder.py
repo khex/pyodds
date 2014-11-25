@@ -2,38 +2,48 @@ from logger import log_db
 
 #  do 2009/2010
 nba_teams = [
-    ('Atlanta Hawks', 'atlanta-hawks', 'Atlanta'),
-    ('Boston Celtics', 'boston-celtics', 'Boston'),
-    ('Brooklyn Nets', 'brooklyn-nets', 'Brooklyn'),
-    ('Charlotte Hornets', 'charlotte-hornets', 'Charlotte'),
-    ('Chicago Bulls', 'chicago-bulls', 'Chicago'),
-    ('Cleveland Cavaliers', 'cleveland-cavaliers', 'Cleveland'),
-    ('Dallas Mavericks', 'dallas-mavericks', 'Dallas'),
-    ('Denver Nuggets', 'denver-nuggets', 'Denver'),
-    ('Detroit Pistons', 'detroit-pistons', 'Detroit'),
-    ('Golden State Warriors', 'golden-state-warriors', 'Golden State'),
-    ('Houston Rockets', 'houston-rockets', 'Houston'),
-    ('Indiana Pacers', 'indiana-pacers', 'Indiana'),
-    ('Los Angeles Clippers', 'los-angeles-clippers', 'LA Clippers'),
-    ('Los Angeles Lakers', 'los-angeles-lakers', 'LA Lakers'),
-    ('Memphis Grizzlies', 'memphis-grizzlies', 'Memphis'),
-    ('Miami Heat', 'miami-heat', 'Miami'),
-    ('Milwaukee Bucks', 'milwaukee-bucks', 'Milwaukee'),
-    ('Minnesota Timberwolves', 'minnesota-timberwolves', 'Minnesota'),
-    ('New Orleans Pelicans', 'new-orleans-pelicans', 'New Orleans'),
-    ('New York Knicks', 'new-york-knicks', 'New York'),
-    ('Oklahoma City Thunder', 'oklahoma-city-thunder', 'Oklahoma'),
-    ('Orlando Magic', 'orlando-magic', 'Orlando'),
-    ('Philadelphia 76ers', 'philadelphia-76ers', 'Philadel.'),
-    ('Phoenix Suns', 'phoenix-suns', 'Phoenix'),
-    ('Portland Trail Blazers', 'portland-trail-blazers', 'Portland'),
-    ('Sacramento Kings', 'sacramento-kings', 'Sacramento'),
-    ('San Antonio Spurs', 'san-antonio-spurs', 'San Antonio'),
-    ('Toronto Raptors', 'toronto-raptors', 'Toronto'),
-    ('Utah Jazz', 'utah-jazz', 'Utah'),
-    ('Washington Wizards', 'washington-wizards', 'Washington'),
+    ('Atlanta Hawks', 'Atlanta'),
+    ('Boston Celtics', 'Boston'),
+    ('Brooklyn Nets' 'Brooklyn'),
+    ('Charlotte Hornets', 'Charlotte'),
+    ('Chicago Bulls', 'Chicago'),
+    ('Cleveland Cavaliers', 'Cleveland'),
+    ('Dallas Mavericks', 'Dallas'),
+    ('Denver Nuggets', 'Denver'),
+    ('Detroit Pistons', 'Detroit'),
+    ('Golden State Warriors', 'Golden State'),
+    ('Houston Rockets', 'Houston'),
+    ('Indiana Pacers', 'Indiana'),
+    ('Los Angeles Clippers', 'LA Clippers'),
+    ('Los Angeles Lakers', 'LA Lakers'),
+    ('Memphis Grizzlies', 'Memphis'),
+    ('Miami Heat', 'Miami'),
+    ('Milwaukee Bucks', 'Milwaukee'),
+    ('Minnesota Timberwolves', 'Minnesota'),
+    ('New Orleans Pelicans', 'New Orleans'),
+    ('New York Knicks', 'New York'),
+    ('Oklahoma City Thunder', 'Oklahoma'),
+    ('Orlando Magic', 'Orlando'),
+    ('Philadelphia 76ers', 'Philadel'),
+    ('Phoenix Suns', 'Phoenix'),
+    ('Portland Trail Blazers', 'Portland'),
+    ('Sacramento Kings', 'Sacramento'),
+    ('San Antonio Spurs', 'San Antonio'),
+    ('Toronto Raptors', 'Toronto'),
+    ('Utah Jazz', 'Utah'),
+    ('Washington Wizards', 'Washington'),
 ]
 
+link_names = ['atlanta-hawks', 'boston-celtics', 'brooklyn-nets',
+              'charlotte-hornets', 'chicago-bulls', 'cleveland-cavaliers',
+              'dallas-mavericks', 'denver-nuggets', 'detroit-pistons',
+              'golden-state-warriors', 'houston-rockets', 'indiana-pacers',
+              'los-angeles-clippers', 'los-angeles-lakers', 'memphis-grizzlies',
+              'miami-heat', 'milwaukee-bucks', 'minnesota-timberwolves',
+              'new-orleans-pelicans', 'new-york-knicks', 'oklahoma-city-thunder',
+              'orlando-magic', 'philadelphia-76ers', 'phoenix-suns',
+              'portland-trail-blazers', 'sacramento-kings', 'san-antonio-spurs',
+              'toronto-raptors', 'utah-jazz', 'washington-wizards']
 
 def stat_line(score, line):
     try:
@@ -61,8 +71,6 @@ def profit(self):
 def handy_counter(score, handy):
     try:
         home, away = score[0]-score[1], score[1]-score[0]
-        #  print score, handy, home, away, '\n'
-        #  if team 1 is leader
         if handy[0] < handy[1]:
             return home + handy[0], away + handy[1]
         else:
@@ -116,20 +124,60 @@ def itot(handy, total):
 
 
 def builder(mdata):
+    """
+    Buid match results dicst()
+
+    :param
+        mdata: Match
+    :return {
+        'league': 'NBA',
+        'links': {
+            'oddsportal': 'http:// ... /nba-2013-2014/san-antonio-spurs-miami-heat-67Upolsm/',
+            'nba': '',
+            'betxplorer': ''},
+        'season': '2014/2015',
+        'xeid': '67Upolsm', 
+        'datetime': {
+            'date': '11-06-14',
+            'timestamp': 1402448400, 
+            'datetime': '11 Jun 2014 04:00',
+            'scraptime': '2014-11-25 13:50:44',
+            'time': '04:00'}, 
+        'score': {
+            'score': [104, 87],
+            'res_box': '22:29, 25:11, 30:18, 27:29',
+            'ot': False}, 
+        'away': {
+            'full': 'Miami Heat',
+            'short': 'Miami'},
+            'profit': (0, 0, 0, 0),
+            'result': (False, -17, 191, 87),
+            'delta': (-1, -5.5, -9.5, -7.5), 
+        'home': {... as away ... },
+        'sport': 'basketball', 
+        'type': 'play-offs', 
+        'odds': {
+            'line': (1.28, 3.65),
+            'total': (200.5, 1.91, 1.91),
+            'indy': ((105.5, 1.91, 1.91), (94.5, 1.91, 1.91)),
+            'handy': ((-11.5, 1.92), (11.5, 1.89))}}
+    """
     try:
+        from datetime import datetime
         mdata['itot'] = itot(mdata['hcap'], mdata['totl'])
         datetime = {
             'date': mdata['date'],
             'time': mdata['time'],
             'datetime': mdata['datetime'],
-            'timestamp': mdata['timestamp']}
+            'timestamp': mdata['timestamp'],
+            'scraptime': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
         
         score = {
             'score': mdata['score'],
             'ot': mdata['ot'],
             'res_box': mdata['res_box']}
         
-        #  count smth ?? results
         st = stat_line(mdata['score'], mdata['line'])
         hc = handy_counter(mdata['score'], mdata['hcap'][1])
         tl = (mdata['score'][0] + mdata['score'][1]) - mdata['totl'][1][0]
@@ -137,7 +185,6 @@ def builder(mdata):
               mdata['score'][1] - mdata['itot'][1])
 
         home = {
-            'name': get_teams(mdata['teams'][0]),
             'result': resulter('home', mdata['score']),
             'delta': (st[0], hc[0], tl, it[0]),
             'profit': (
@@ -146,8 +193,9 @@ def builder(mdata):
                 int(mdata['totl'][2][0] * 100 - 100) if tl > 0 else 0,
                 91 if it[0] > 0 else 0)}
 
+        home['full'], home['short'] = get_teams(mdata['teams'][0])
+
         away = {
-            'name': get_teams(mdata['teams'][1]),
             'result': resulter('away', mdata['score']),
             'delta': (st[1], hc[1], tl, it[1]),
             'profit': (
@@ -155,8 +203,10 @@ def builder(mdata):
                 int(mdata['hcap'][2][1] * 100 - 100) if hc[1] > 0 else 0,
                 int(mdata['totl'][2][0] * 100 - 100) if tl > 0 else 0,
                 91 if it[1] > 0 else 0)}
-        #  add betxplorer
-        #  count nba link
+
+        away['full'], away['short'] = get_teams(mdata['teams'][1])
+
+        #  count nba link & betexplorer
         links = {
             'oddsportal': 'http://www.oddsportal.com/' + mdata['link'],
             'nba': '',
@@ -196,7 +246,7 @@ if __name__ == '__main__':
         'ot': False,
         'hash': 'yj1b4',
         'xeid': '67Upolsm',
-        'tipe': 'play-offs',
+        'type': 'play-offs',
         'score': [104, 87],
         'link': '/basketball/usa/nba-2013-2014/san-antonio-spurs-miami-heat-67Upolsm/',
         'teams': ['San Antonio Spurs', 'Miami Heat'],
@@ -207,7 +257,6 @@ if __name__ == '__main__':
         'datetime': '11 Jun 2014 04:00',
         'line': (1.28, 3.65),
         'hcap': (48, (-11.5, 11.5), (1.92, 1.89), 0.03),
-        'totl': (38, (200.5, 200.5), (1.9, 1.91), 0.01),
-        #  'itot': (103.5, 96.5),
-    }
+        'totl': (38, (200.5, 200.5), (1.9, 1.91), 0.01)}
+
     print builder(match_data)
