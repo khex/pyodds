@@ -4,7 +4,7 @@ from logger import log_db
 nba_teams = [
     ('Atlanta Hawks', 'Atlanta'),
     ('Boston Celtics', 'Boston'),
-    ('Brooklyn Nets' 'Brooklyn'),
+    ('Brooklyn Nets', 'Brooklyn'),
     ('Charlotte Hornets', 'Charlotte'),
     ('Chicago Bulls', 'Chicago'),
     ('Cleveland Cavaliers', 'Cleveland'),
