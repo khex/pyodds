@@ -61,24 +61,23 @@ if args['hist'] is True:
         tags_list = table(season, x)
 
         if tags_list is not None:
-            y = 0
             ###################
             #   row by rows   #
             ###################
+            
             for y, tag_arr in enumerate(tags_list):
                 seas_type, xeid, bs4_tag = tag_arr
-                
+                log_main('Y is %s', (y))
                 ###################
                 #   check xeid    #
                 ###################
                 if get_xeid(xeid) is True:
-                    text = 'Xeid: %s exist' % xeid
-                    print(text)
+                    print('Xeid: %s exist' % xeid)
+                
+                #######################
+                #   match from tags   #
+                #######################
                 else:
-
-                    #######################
-                    #   match from tags   #
-                    #######################
                     match = rows(bs4_tag)
                     if match is not None:
                         match['season'] = season

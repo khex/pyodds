@@ -4,8 +4,6 @@ from bs4 import BeautifulSoup
 from logger import log_rows, log_table
 
 #  http://stackoverflow.com/questions/9264763
-
-seas_type, tags_list = '', []
 link = ['http://www.oddsportal.com', '/basketball/usa/nba-', '/results/page/']
 
 
@@ -25,6 +23,7 @@ def table(season, iks):
         tags_list: [('pre-season', 'pS6gVAwC', bs4.tag), ...]
     """
     try:
+        seas_type, tags_list = '', []
         url = link[0] + link[1] + season + link[2] + str(iks) + '/'
         r = requests.get(url)
 
