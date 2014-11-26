@@ -67,7 +67,6 @@ if args['hist'] is True:
             
             for y, tag_arr in enumerate(tags_list):
                 seas_type, xeid, bs4_tag = tag_arr
-                log_main('Y is %s', (y))
                 ###################
                 #   check xeid    #
                 ###################
@@ -93,7 +92,7 @@ if args['hist'] is True:
                             if m is not None:
                                 res = save_to_db(m)
                                 if res is not None:
-                                    txt = '%s %s %s %s SAVED' % (season, x, y, m['xeid'])
+                                    txt = '%s %s %s %s SAVED' % (season, x, y+1, m['xeid'])
                                     log_main.info(txt)
 
 #  last results

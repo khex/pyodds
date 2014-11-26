@@ -132,6 +132,8 @@ def builder(mdata):
         mdata: Match
     :return {
         'league': 'NBA',
+        'type': 'play-offs',
+        'sport': 'basketball', 
         'links': {
             'oddsportal': 'http...san-antonio-spurs-miami-heat-67Upolsm/',
             'nba': '',
@@ -155,8 +157,8 @@ def builder(mdata):
             'result': (False, -17, 191, 87),
             'delta': (-1, -5.5, -9.5, -7.5), 
         'home': {... as away ... },
-        'sport': 'basketball', 
-        'type': 'play-offs', 
+
+ 
         'odds': {
             'line': (1.28, 3.65),
             'total': (200.5, 1.91, 1.91),

@@ -40,7 +40,6 @@ def table(season, iks):
             soup_list = soup.find(id='tournamentTable').find('tbody').contents
             #  from 115 items to ~60
             filt_soup = filter(lambda x: len(x.get('class')) == 2, soup_list)
-            global seas_type, tags_list
             for tag in filt_soup[1:]:
                 if tag.get('class')[1] == 'deactivate':
                     xeid = str(tag.get('xeid'))
@@ -179,4 +178,18 @@ if __name__ == '__main__':
     #  return (asdf, url)
     html = table('2013-2014', 4)
     for i, h in enumerate(html):
-        print i + 1, rows(h[2])
+        print i + 1, h[0], h[1], rows(h[2])
+    """
+        {
+            'res_box': '34:28, 34:32, 30:29, 27:25',
+            'ot': False,
+            'timestamp': 1397084400,
+            'teams': ['Toronto Raptors', 'Philadelphia 76ers'],
+            'score': [125, 114],
+            'link': '/basketball/usa/nba-2013-2014/toronto-raptors-philadelphia-76ers-2XbuCZBt/',
+            'time': '02:00',
+            'date': '10-04-14',
+            'datetime': '10 Apr 2014 02:00',
+            'xhash': 'yjf41'
+        }
+    """
