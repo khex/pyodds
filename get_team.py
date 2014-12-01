@@ -7,6 +7,7 @@ teams = (
     'Houston', 'Indiana', 'LA Clippers', 'LA Lakers', 'Memphis',
     'Miami', 'Milwaukee', 'Minnesota', 'New Orleans', 'New York',
     'Oklahoma', 'Orlando', 'Philadel', 'Phoenix', 'Portland',
+    'Gopas',
     'Sacramento', 'San Antonio', 'Toronto', 'Utah', 'Washington') 
 
 client = MongoClient("mongodb://localhost:27017/")
