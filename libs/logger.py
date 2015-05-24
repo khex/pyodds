@@ -1,13 +1,16 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import logging
 import logging.config
 
 LOGGER = {
-    'version': 1,
+    'version': 1.0,
     'disable_existing_loggers': True,
     'formatters': {
         'verbose': {
             #  docs.python.org/2.7/library/logging.html#logrecord-attributes
-            'format': '%(asctime)s %(levelname)s %(name)s %(module)s %(message)s'
+            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
         },
     },
     'handlers': {
@@ -19,7 +22,7 @@ LOGGER = {
         'fileHandler': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'scrapper.log',
+            'filename': '../delta.log',
             'mode': 'a',
             'encoding': 'utf-8',
             'formatter': 'verbose'
@@ -31,12 +34,7 @@ LOGGER = {
             'propagate': True,
             'level': 'DEBUG',
         },
-        'table': {
-            'handlers': ['consoleHandler', 'fileHandler'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'rows': {
+        'tabler': {
             'handlers': ['consoleHandler', 'fileHandler'],
             'level': 'DEBUG',
             'propagate': False,
@@ -62,8 +60,7 @@ LOGGER = {
 logging.config.dictConfig(LOGGER)
 
 log_main = logging.getLogger('main')
-log_table = logging.getLogger('table')
-log_rows = logging.getLogger('rows')
+log_tabler = logging.getLogger('tabler')
 log_odds = logging.getLogger('odds')
 log_build = logging.getLogger('build')
 log_db = logging.getLogger('db')
@@ -76,11 +73,11 @@ if __name__ == '__main__':
     log_main.error('error message')
     log_main.critical('critical message')
     #   main.tablerowsTable
-    log_table.debug('debug message')
-    log_table.info('info message')
-    log_table.warn('warn message')
-    log_table.error('error message')
-    log_table.critical('critical message')
+    log_tabler.debug('debug message')
+    log_tabler.info('info message')
+    log_tabler.warn('warn message')
+    log_tabler.error('error message')
+    log_tabler.critical('critical message')
     #   main.tablerowsRows
     log_main.debug('debug message')
     log_main.info('info message')

@@ -46,6 +46,7 @@ link_names = [
     'portland-trail-blazers', 'sacramento-kings', 'san-antonio-spurs',
     'toronto-raptors', 'utah-jazz', 'washington-wizards']
 
+
 def stat_line(score, line):
     try:
         if score[0] > score[1]:
@@ -60,7 +61,7 @@ def get_teams(team_full):
     for team in nba_teams:
         if team_full == team[0]:
             return team
-    
+
 
 def profit(self):
     if self.data.score[0] > self.data.score[1]:
@@ -71,7 +72,7 @@ def profit(self):
 
 def handy_counter(score, handy):
     try:
-        home, away = score[0]-score[1], score[1]-score[0]
+        home, away = score[0] - score[1], score[1] - score[0]
         if handy[0] < handy[1]:
             return home + handy[0], away + handy[1]
         else:
@@ -133,32 +134,30 @@ def builder(mdata):
     :return {
         'league': 'NBA',
         'type': 'play-offs',
-        'sport': 'basketball', 
+        'sport': 'basketball',
         'links': {
             'oddsportal': 'http...san-antonio-spurs-miami-heat-67Upolsm/',
             'nba': '',
             'betxplorer': ''},
         'season': '2014/2015',
-        'xeid': '67Upolsm', 
+        'xeid': '67Upolsm',
         'datetime': {
             'date': '11-06-14',
-            'timestamp': 1402448400, 
+            'timestamp': 1402448400,
             'datetime': '11 Jun 2014 04:00',
             'scraptime': '2014-11-25 13:50:44',
-            'time': '04:00'}, 
+            'time': '04:00'},
         'score': {
             'score': [104, 87],
             'res_box': '22:29, 25:11, 30:18, 27:29',
-            'ot': False}, 
+            'ot': False},
         'away': {
             'full': 'Miami Heat',
             'short': 'Miami'},
             'profit': (0, 0, 0, 0),
             'result': (False, -17, 191, 87),
-            'delta': (-1, -5.5, -9.5, -7.5), 
+            'delta': (-1, -5.5, -9.5, -7.5),
         'home': {... as away ... },
-
- 
         'odds': {
             'line': (1.28, 3.65),
             'total': (200.5, 1.91, 1.91),
@@ -174,13 +173,13 @@ def builder(mdata):
             'datetime': mdata['datetime'],
             'timestamp': mdata['timestamp'],
             'scraptime': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-        
+        }
+
         score = {
             'score': mdata['score'],
             'ot': mdata['ot'],
             'res_box': mdata['res_box']}
-        
+
         st = stat_line(mdata['score'], mdata['line'])
         hc = handy_counter(mdata['score'], mdata['hcap'][1])
         tl = (mdata['score'][0] + mdata['score'][1]) - mdata['totl'][1][0]
@@ -262,4 +261,4 @@ if __name__ == '__main__':
         'hcap': (48, (-11.5, 11.5), (1.92, 1.89), 0.03),
         'totl': (38, (200.5, 200.5), (1.9, 1.91), 0.01)}
 
-    print builder(match_data)
+    print(builder(match_data))

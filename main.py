@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Odds portal NBA scrapper
 
@@ -26,9 +25,11 @@ from libs.logger import log_main
 from libs.db import get_xeid, save_to_db
 
 
-seas = {'14/15': '2014-2015', '13/14': '2013-2014', '12/13': '2012-2013',
-        '11/12': '2011-2012', '10/11': '2010-2011', '09/10': '2009-2010',
-        '08/09': '2008-2009', '07/08': '2007-2008', '06/07': '2006-2007'}
+seas = {
+    '14/15': '2014-2015', '13/14': '2013-2014', '12/13': '2012-2013',
+    '11/12': '2011-2012', '10/11': '2010-2011', '09/10': '2009-2010',
+    '08/09': '2008-2009', '07/08': '2007-2008', '06/07': '2006-2007'
+}
 args = docopt(__doc__, version='0.1.7')
 season = seas[args['<season>']]
 
@@ -64,7 +65,7 @@ if args['hist'] is True:
             ###################
             #   row by rows   #
             ###################
-            
+
             for y, tag_arr in enumerate(tags_list):
                 seas_type, xeid, bs4_tag = tag_arr
                 ###################
@@ -72,7 +73,7 @@ if args['hist'] is True:
                 ###################
                 if get_xeid(xeid) is True:
                     print('Xeid: %s exist' % xeid)
-                
+
                 #######################
                 #   match from tags   #
                 #######################
@@ -92,9 +93,9 @@ if args['hist'] is True:
                             if m is not None:
                                 res = save_to_db(m)
                                 if res is not None:
-                                    txt = '%s %s %s %s SAVED' % (season, x, y+1, m['xeid'])
+                                    txt = '%s %s %s %s SAVED' % (season, x, y + 1, m['xeid'])
                                     log_main.info(txt)
 
 #  last results
 else:
-    print 'Woked ELSE statement'
+    print('Woked ELSE statement')

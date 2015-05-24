@@ -6,8 +6,10 @@ from logger import log_odds
 
 
 pref = 'http://fb.oddsportal.com/feed/match/'
-decoder = json.JSONDecoder(object_hook=None, parse_float=None, parse_int=None,
-                           parse_constant=None, strict=True, object_pairs_hook=None)
+decoder = json.JSONDecoder(
+    object_hook=None, parse_float=None, parse_int=None,
+    parse_constant=None, strict=True, object_pairs_hook=None
+)
 
 
 def get_page(xeid, xhash, match_type):
@@ -29,11 +31,10 @@ def get_page(xeid, xhash, match_type):
         type_dict = {'line': '-3-1-', 'hcap': '-5-1-', 'totl': '-2-1-'}
         link = pref + '1-3-' + xeid + type_dict[match_type] + xhash + '.dat'
         r = requests.get(link)
-        #globals.jsonpCallback('/feed/match/1-3-UX19OwXR-3-1-yja8d.dat',
-        #);
+        # globals.jsonpCallback('/feed/match/1-3-UX19OwXR-3-1-yja8d.dat')
         json_string = str(r.content)[63:-2]
         dic_obj = decoder.decode(json_string)
-        return dic_obj['d']['oddsdata']['back'] 
+        return dic_obj['d']['oddsdata']['back']
     except Exception:
         log_odds.exception('From: get_rage()')
 
@@ -53,7 +54,7 @@ def map_odds(odds_arry):
     """
     try:
         arr_len = len(odds_arry)
-        if type(odds_arry[0]) is list:                
+        if type(odds_arry[0]) is list:
             home = sum([val[0] for val in odds_arry]) / arr_len
             away = sum([val[1] for val in odds_arry]) / arr_len
         else:
@@ -124,6 +125,7 @@ def hcap_totl(xeid, xhash, odd_type):
             return sort_arry[0] if sort_arry[0][0] > 10 else sort_arry[1]
     except Exception:
         log_odds.exception('From hcap_totl()')
+
 
 def get_odds(xeid, xhash):
     try:
@@ -196,11 +198,11 @@ if __name__ == '__main__':
         'brooklyn-nets-minnesota-timberwolves-bPVSR4U9/',
         'detroit-pistons-new-york-knicks-G0QXQOqG/',
     ]
-    
+
     for i, u in enumerate(url):
         if i < 50:
             xeid = u[-9:][0:8]  # get xeid from link
-            #print full + u
+            # print full + u
             p = requests.get(full + u)
             poup = BeautifulSoup(p.content)
             text = str(poup)
@@ -208,4 +210,4 @@ if __name__ == '__main__':
             last = text.find('xhashf') - 3
             xhash = str(text[frst:last])
 
-            print i+1, get_odds(xeid, xhash)
+            print(i + 1, get_odds(xeid, xhash))
