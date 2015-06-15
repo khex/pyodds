@@ -1,4 +1,8 @@
-tabler.py > tabler()
- [x] dom smth @done (15-05-24 19:29)
- [ ] adfwsdfsdf
- [ ] fsdfsdfsdfg
+modules
+ [x] how to import module from the upper folder @done (15-06-14 14:36)
+ [ ] define Schemas and test "db.teams.find()"
+
+libs/mdb
+ [x] create "modules" CR @done (15-06-14 16:32)
+ [-] wrap by try/except all methods of class @cancelled (15-06-15 12:56)
+ [ ] create "teams" CRUD

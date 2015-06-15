@@ -6,12 +6,17 @@ import requests
 import json
 from bs4 import BeautifulSoup
 from logger import log_tabler
-from mdb import get_xeid
+# from mdb import get_xeid
+
+
+""" Описание самой бизнес логики страницы результатов.
+По аргументам url адреса сайт загружает пустой скелет 'table_resalts.html'.
+А дальше при помощи AJAX запроса получает HTML с данными матча ajax_resp.html
+"""
 
 
 def get_table(sport, strana, liga, sezon):
-    """-----------------------------------------------------------------------
-        Строит адресс ссылки из аргументов и pager aka iks от 1 до 60
+    """ Строит адресс ссылки из аргументов и pager aka iks от 1 до 60
         идет на страницу результатов где фильтрует из ~ 160 table rows
         только 50 шт. и создает массив из данных с классами:
             'even deactivate' и ' deactivate' => данные матча
@@ -22,10 +27,10 @@ def get_table(sport, strana, liga, sezon):
         дальше в 'counter.py' выщитывает дельту
         сохраняет в Монге и возращает 'Ok.' по окончании.
         Arguments:
-            sport, strana, liga, sezon
+            sport, strana, liga, sezon @ as low sens strings ?
         Return:
             'Ok.'
-    -----------------------------------------------------------------------"""
+    """
     # dublicated = 0
     seas_type = ''
     for iks in list(range(7, 8)):

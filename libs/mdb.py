@@ -1,76 +1,60 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+bin\mongod.exe --config mongodb.conf
+"""
+
 from pymongo import MongoClient
-from logger import log_db
-"""
-import pymongo, bson
-from pymongo import Connection
-"""
+# db.things.find_one({'_id': ObjectId('4ea113d6b684853c8e000001') })
+from bson.objectid import ObjectId
 
-client = MongoClient('mongodb://localhost:27017/')
-db = client['deltabase']
-# teams = db['teams'] == db.teams
-# matches = db['matches'] == db.matches
-
-#  db.drop_collection('matches')
-#  def db_avaliable(): return True
+# from logger import log_db
+# import pymongo, bson
+try:
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['delta_test']
+except Exception as e:
+    raise(e)
 
 
-def get_xeid(xeid):
-    try:
-        temp = db.matches.find_one({'xeid': xeid})
-        # that return None if Exception
-        return True if temp is not None else False
-    except Exception:
-        log_db.exception('Can\'t get \'xeid\' from DataBase')
+class Module(object):
+    """
+    self.__modules заменяет 'db.modules.insert_one()'
+    """
 
-"""
-def team_insert(argy):
-    # in v3.02 use insert_one() or insert_many()
-    try:
-        if type(argy) is list or type(argy) is tuple:
-            result = db.test.insert_many(argy)
-        elif type(argy) is dict:
-            result = db.test.insert_many(argy)
-        else:
-            raise('Can\'t save becouse argy is not a tuple, list or dict')
-        return result
-    except Exception as e:
-        raise(e)
+    def __init__(self):
+        self.__modules = db['modules']
+
+    def save(self, arg):
+        return self.__modules.insert_one(arg).inserted_id
+
+    """
+    def get_id(self, mid):
+        try:
+            return self.__modules.find_one({'mid': mid})['_id']
+        except Exception as e:
+            raise(e)
+    """
 
 
-def foos():
-    как достать все команд NBA етого сезона:
-        1. все команд с tid от 1 - 30
-        2. cursor -> baseball, usa, nba, 2015
-    return specific fields:
-        - full and short
-    pass
+class Team(object):
+    """
+    self.__teams заменяет 'db.teams.insert_many()'
+    """
 
+    def __init__(self):
+        self.__teams = db['teams']
 
-def save_to_db(match):
-    try:
-        db.matches.save(match)
-        xeid = match['xeid']
-        return db.matches.find_one({'xeid': xeid})
-    except Exception:
-        log_db.exception('Can not save to db')
+    def save(self, teams, m_id):
+        for t in teams:
+            t['module'] = ObjectId(m_id)
+        return self.__teams.insert_many(teams).inserted_ids
 
+    """
+    def read(self, mid):
+        return self.__modules.find_one({'mid': mid})
+    """
 
-def team_insert(argy):
-    # in v3.02 use insert_one() or insert_many()
-    print(type(argy))
-    try:
-        if type(argy) is list or type(argy) is tuple:
-            print('List or Tuple')
-            result = db.teams.insert_many(argy)
-        elif type(argy) is dict:
-            print('Is Dict')
-            result = db.teams.insert_many(argy)
-        else:
-            raise('Can\'t save becouse argy is not a tuple, list or dict')
-        return result
-    except Exception as e:
-        raise(e)
-"""
+module = Module()
+team = Team()
