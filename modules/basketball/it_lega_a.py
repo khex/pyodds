@@ -4,8 +4,8 @@
 import sys
 sys.path.append('C:/Users/qm69/Code/delta_odds/libs')
 
-from mdb import module
-from mdb import team
+from mdb import modules
+from mdb import teams
 
 m_data = {
     "mhsh": "bbitla",  # unique
@@ -15,7 +15,7 @@ m_data = {
     "odd_url": ("basketball", "italy", "lega-a")
 }
 
-teams = [
+team_dict = [
     dict(tid=35, opid="KK6dEXeM", full="Avellino", short="avellino",
          seasons=('2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011',
                   '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006')),
@@ -54,7 +54,7 @@ teams = [
                   '2007-2008', '2006-2007', '2012-2013')),
     dict(tid=49, opid="nB8AsBuS", full="NSB Napoli", short="nsb-napoli",
          seasons=('2009-2010', '2008-2009', '2007-2008')),
-    dict(tid=50, opid="", full="Pesaro ", short="pesaro ",
+    dict(tid=50, opid="", full="Pesaro", short="pesaro ",
          seasons=('2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011',
                   '2009-2010', '2008-2009', '2007-2008')),
     dict(tid=51, opid="", full="Pistoia", short="pistoia",
@@ -95,10 +95,8 @@ teams = [
                   '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006')),
 ]
 
-m_id = module.save(m_data)
-print(type(teams))
-print(m_id)
-resp = team.save(teams, m_id)
+m_data = modules.save_n_back(m_data)
+for t in team_dict:
+    t['module'] = m_data
 
-for r in resp:
-    print(r)
+teams.save(team_dict)

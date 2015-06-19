@@ -8,15 +8,14 @@ from mdb import module
 from mdb import team
 
 m_data = {
-    "mhsh": "bsuaml",  # unique
+    "mhsh": "bsusml",  # unique
     "sport": "baseball",
     "country": "USA",
     "league": "MLB",
     "odd_url": ("baseball", "usa", "mlb")
 }
 
-year = ['2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011',
-        '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006']
+year = ['2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008', '2007', '2006', '2005']
 
 teams = [
     dict(tid=70, opid="", full="Arizona Diamondbacks", short="arizona-diamondbacks", seasons=year),
@@ -51,10 +50,8 @@ teams = [
     dict(tid=99, opid="", full="Washington Nationals", short="washington-nationals", seasons=year),
 ]
 
-m_id = module.save(m_data)
-print(type(teams))
-print(m_id)
-resp = team.save(teams, m_id)
+m_data = module.save_n_back(m_data)
+for t in teams:
+    t['module'] = m_data
 
-for r in resp:
-    print(r)
+team.save(teams)

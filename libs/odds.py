@@ -14,15 +14,15 @@ json.JSONDecoder()
 json.loads(): decoding > string > dict()
 """
 
-"""         line  -> get_page -> map_odds
-get_odds -> h_cap -> get_page -> map_odds
-            total -> get_page -> map_odds
+"""      \  home_away  -> get_page -> map_odds \
+get_odds  > h_cap -> get_page -> map_odds  >
+         /  total -> get_page -> map_odds /
 """
 
 
 def get_page(prefix, form, xhash):
     """
-    Helper func to line() & hcap_totl()
+    Helper func to home_away() & hcap_totl()
     that recieve JSON from remote oddsportal
     1-3-UX19OwXR-2-1-yja8d.dat?_=1415473649648
     1-3-UX19OwXR-3-1-yja8d.dat?_=1415473649648
@@ -30,7 +30,7 @@ def get_page(prefix, form, xhash):
 
     Params:
         prefix: адреса '1-3-UX19OwXR' -> вид спорта + xeid
-        form: of betting like 'line', 'h_cap', 'total'
+        form: of betting like 'home_away', 'h_cap', 'total'
         xhash: 'yja8d'
 
     Return {
@@ -41,13 +41,12 @@ def get_page(prefix, form, xhash):
     try:
         # 'http://fb.oddsportal.com/feed/match/1-3-UX19OwXR-3-1-yja8d.dat'
         domain = 'http://fb.oddsportal.com/feed/match/'
-        form_dict = {'line': '-3-1-', 'h_cap': '-5-1-', 'total': '-2-1-'}
+        form_dict = {'home_away': '-3-1-', 'h_cap': '-5-1-', 'total': '-2-1-'}
 
         link_text = '{}feed/match/{}{}{}.dat'
         link = link_text.format(domain, prefix, form_dict[form], xhash)
 
-        r = requests.get(link)
-        r.encoding = 'ISO-8859-1'
+        r = requests.get(link).encoding = 'ISO-8859-1'
 
         """  !!!! а может в отдельную функцию ету из tabler.py ???
         обложить тестами
@@ -100,9 +99,13 @@ def map_odds(odds_arry):
         log_odds.exception('Can not map_odds')
 
 
-def line(xeid, xhash):
+def one_x_two():
+    pass
+
+
+def home_away(xeid, xhash):
     """
-    Get values of line odds
+    Get values of home_away odds
 
     :param
         xeid:  '67Upolsm'
@@ -111,14 +114,14 @@ def line(xeid, xhash):
         (1.27, 2.55)
     """
     try:
-        odds_dict = get_page(xeid, xhash, 'line')['E-3-1-0-0-0']['odds']
+        odds_dict = get_page(xeid, xhash, 'home_away')['E-3-1-0-0-0']['odds']
         if odds_dict is not None:
             odds_arry = [odds_dict[item] for item in odds_dict]
             data = map_odds(odds_arry)
             if data is not None:
                 return data['home'], data['away']
     except Exception:
-        log_odds('From line_func()')
+        log_odds('From home_away_func()')
 
 
 def h_cap(xeid, xhash, odd_type):
@@ -157,7 +160,7 @@ def h_cap(xeid, xhash, odd_type):
         log_odds.exception('From hcap_totl()')
 
 
-def total():
+def over_under():
     pass
 
 
@@ -166,11 +169,11 @@ def get_odds(xeid, xhash):
         mp.freeze_support()
         pool = mp.Pool(processes=3)
         res = [
-            pool.apply(line, args=(xeid, xhash,)),
-            # pool.apply(hcap_totl, args=(xeid, xhash, 'hcap',)),
-            # pool.apply(hcap_totl, args=(xeid, xhash, 'totl',))
+            pool.apply(home_away, args=(xeid, xhash,)),
+            # ex. pool.apply(hcap_totl, args=(xeid, xhash, 'hcap',)),
+            # ex. pool.apply(hcap_totl, args=(xeid, xhash, 'totl',))
             pool.apply(h_cap, args=(xeid, xhash, 'hcap',)),
-            pool.apply(total, args=(xeid, xhash, 'totl',))
+            pool.apply(over_under, args=(xeid, xhash, 'totl',))
         ]
         pool.close()
 
@@ -181,5 +184,5 @@ def get_odds(xeid, xhash):
         log_odds.exception('From get_odds')
 
 if __name__ == '__main__':
-    page = get_page('INwoa3YK', 'yj4e4', 'line')
+    page = get_page('INwoa3YK', 'yj4e4', 'home_away')
     print(page)
