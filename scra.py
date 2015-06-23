@@ -54,7 +54,7 @@ mhsh_dict = {
     'bbusnb': ('basketball', 'usa', 'nba', lngs)
 }
 
-args = docopt(__doc__, version='0.3.109')
+args = docopt(__doc__, version='0.4.123')
 season, mhsh = args['<seas>'], args['<mhsh>']
 module = mhsh_dict[mhsh]
 

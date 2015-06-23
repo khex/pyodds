@@ -1,26 +1,19 @@
 modules
- [x] how to import module from the upper folder @done (15-06-14 14:36)
- [ ] Выкидыватаь ошибку, если MongoDB не доступна
- [ ] define Schemas and test "db.teams.find()"
- [ ] скопировать в каталог 'pyodd'
+ ☐ Выкидыватаь ошибку, если MongoDB не доступна
+ ☐ define Schemas and test "db.teams.find()"
+ ☐ скопировать в каталог 'pyodd'
 
-libs/mdb
- [ ] в начале проверить доступность базы
- [x] create "modules" CR @done (15-06-14 16:32)
- [-] wrap by try/except all methods of class @cancelled (15-06-15 12:56)
- [ ] create "teams" CR
+libs/mdb.py
+ ☐ переписать все анотации к функциям
+ ☐ переписать все log сообщения
+ ☐ в начале проверить доступность базы
+ ☐ create "teams" CR
 
 libs/tabler.py
-  [x] динамично менять дрес urL учитывая теперешний сезон @done (15-06-17 00:48)
-  [x] Final result 86:91 OT (80:80) (23:9, 23:23, 16:23, 18:25, 6:11) ERROR @done (15-06-18 03:05)
-  [x] проверить xeid в базе @done (15-06-18 03:28)
-  [x] Ревизия 'def rows_to_dict(tr):' @done (15-06-18 14:21)
-  [x] "Capo d\\'Orlando"  @done (15-06-18 14:42)
-  [x] проверять название команд на наличие в базе   @done (15-06-18 14:21)
-  [ ] переписать все анотации к функциям
-  [ ] переписать log сообщения
+ ☐ переписать все анотации к функциям
+ ☐ переписать все log сообщения
 
-Main Questians
- [x] main.py => scrap.py @done (15-06-16 16:07)
- [ ] Каждый вид спорта иммет свою особеность фор и инд. тоталов
- 
+libs/odds.py
+ ☐ написать 'one_x_two()'
+ ☐ написать 'odds_even()'
+ ☐ переписать все log сообщения

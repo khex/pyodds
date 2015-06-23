@@ -4,185 +4,357 @@
 import json
 import requests
 import multiprocessing as mp
+from statistics import mean
 from logger import log_odds
 
-""" JSON
-json.JSONDecoder():
-json.dumps(): dict() > json
-
-json.JSONDecoder()
-json.loads(): decoding > string > dict()
-"""
-
-"""      \  home_away  -> get_page -> map_odds \
-get_odds  > h_cap -> get_page -> map_odds  >
-         /  total -> get_page -> map_odds /
+"""      \  home_away  -> get_page -> map_close \
+get_odds  > asian_handy -> get_page -> map_close  >
+         /  home_away -> get_page -> map_close /
 """
 
 
-def get_page(prefix, form, xhash):
+def get_page(pref, xeid, xhash, value):
     """
-    Helper func to home_away() & hcap_totl()
-    that recieve JSON from remote oddsportal
-    1-3-UX19OwXR-2-1-yja8d.dat?_=1415473649648
-    1-3-UX19OwXR-3-1-yja8d.dat?_=1415473649648
-    1-3-UX19OwXR-5-1-yja8d.dat?_=1415473715925
+        Строит ссылку из параметров, при помощи requests
+        запрашивает JSON с данными коэф. на метч и парсит их
+        в питоновский словарь. Ex.: 'feed_home_away.js'
 
-    Params:
-        prefix: адреса '1-3-UX19OwXR' -> вид спорта + xeid
-        form: of betting like 'home_away', 'h_cap', 'total'
-        xhash: 'yja8d'
+        Arguments:
+            pref: адреса '1-6' -> бейсбол
+            xeid: 'UX19OwXR'
+            xhash: 'yja8d'
+            value: '3-3' -> frst_half
 
-    Return {
-        'oddsdata': ...,
-        'history': ...
-        }
+        Return: {
+            'oddsdata': ...,
+            'history': ...}
     """
     try:
         # 'http://fb.oddsportal.com/feed/match/1-3-UX19OwXR-3-1-yja8d.dat'
-        domain = 'http://fb.oddsportal.com/feed/match/'
-        form_dict = {'home_away': '-3-1-', 'h_cap': '-5-1-', 'total': '-2-1-'}
+        domain = 'http://fb.oddsportal.com/feed/match'
+        link_text = '{}/{}-{}-{}-{}.dat'
+        link = link_text.format(domain, pref, xeid, value, xhash)
 
-        link_text = '{}feed/match/{}{}{}.dat'
-        link = link_text.format(domain, prefix, form_dict[form], xhash)
+        r = requests.get(link)  # .encoding = 'ISO-8859-1'
+        if r.status_code != 200:
+            raise('results page status code is {}'.format(r.status_code))
 
-        r = requests.get(link).encoding = 'ISO-8859-1'
-
-        """  !!!! а может в отдельную функцию ету из tabler.py ???
-        обложить тестами
-        """
+        """  в отдельную функцию ету из tabler.py json_cuter.py   """
         r_string = str(r.content)
         starts = r_string.find(".dat\\',") + 8
         params = json.loads(r_string[starts:-3])
 
-        """
+        """ partals/feed_home_away.js
         ['d']['oddsdata']['back']- массив кф. на мамент начала собития
-        ['d']['history']['back'] - массив истории кф. с начала открытия
+        ['d']['history']['back'] - массив кф. с начала прийома ставок
         """
         return {
-            'oddsdata': params['d']['oddsdata']['back'],
-            'history': params['d']['history']['back']
-        }
+            'close': params['d']['oddsdata']['back'],
+            'history': params['d']['history']['back']}
+
     except Exception:
         log_odds.exception('get_page ERROR')
 
 
-def map_odds(odds_arry):
+def map_close(odds_arry):
     """
-    Вспомогательная функция, которая из JSON словаря
-    высчитывает средее геометрическое.
+        Мапит массив коэф.. на момент закрытия
 
-    Arguments:
-        odds_arry: { 'E-3-1--3.5-0-0': ... , }
+        Arguments:
+            Dict of lists or dicts
+            {"392":[1.72,2.15], "78":[2.13,1.81], "49":[2.07,1.76]}  or
+            ['424': {'0': 2.59, '1': 1.51}, ... , '406': {'0': 2.6, '1': 1.53}]
 
-    Return {
-        'home': (mean, avrg_open, avrg_close),
-        'away': (mean, avrg_open, avrg_close),
-        mean = (avrg_open + avrg_close) / 2
-    }
+        Return:
+            [1.75, 1.91]
     """
     try:
-        arr_len = len(odds_arry)
-        if type(odds_arry[0]) is list:
-            home = sum([val[0] for val in odds_arry]) / arr_len
-            away = sum([val[1] for val in odds_arry]) / arr_len
+        if type(list(odds_arry.values())[0]) is list:
+            # odds -> list
+            arry_home = [odds[0] for odds in odds_arry.values()]
+            arry_away = [odds[1] for odds in odds_arry.values()]
+
         else:
-            home = sum([val['0'] for val in odds_arry]) / arr_len
-            away = sum([val['1'] for val in odds_arry]) / arr_len
-        return {
-            'length': arr_len,
-            'home': round(home, 2),
-            'away': round(away, 2),
-            'delta': round(abs(home - away), 2),
-        }
+            # odds -> dict
+            arry_home = [odds['0'] for odds in odds_arry.values()]
+            arry_away = [odds['1'] for odds in odds_arry.values()]
+
+        return [
+            round(mean(arry_home), 2),
+            round(mean(arry_away), 2)]
+
     except Exception:
-        log_odds.exception('Can not map_odds')
+        log_odds.exception('Can\'t map_close')
+
+
+def map_open(odds_arry, tids):
+    """
+        Выбирает самые ранние, по времени, коэф..
+        на момент открытия и мапит их
+
+        Arguments:
+            tids = ["221hix2rrhkx0x48k1v", "221hix2rrhkx0x48k20"]
+            "back":{
+                "221hix2rrhkx0x48k1v":{
+                    "2":[ ["1.91", null, 1433076947], ... , ["2.09", null, 1433116298]],
+                    "392":[[1.72,0,1432939158]], ...
+                    "78":[["2.07",null,1433116478], ...
+                "221hix2rrhkx0x48k20":{
+                    "2":[["1.91",null,1433076947], ...
+                    "392":[[2.15,0,1432939158]], ...
+                    "78":[["1.85",null,1433116478], ...
+
+        Return:
+            [1.89, 1.91]
+    """
+
+    home_arry = [float(odd[-1][0]) for odd in odds_arry[tids[0]].values()]
+    away_arry = [float(odd[-1][0]) for odd in odds_arry[tids[1]].values()]
+
+    return [
+        round(mean(home_arry), 2),
+        round(mean(away_arry), 2)]
 
 
 def one_x_two():
+    """
+    Коэф. на 1X2
+    """
     pass
 
 
-def home_away(xeid, xhash):
+def home_away(pref, xeid, xhash, args_dict):
     """
-    Get values of home_away odds
+        Коэф. на Home/Away
 
-    :param
-        xeid:  '67Upolsm'
-        xhash: 'yj1b4'
-    :return
-        (1.27, 2.55)
+        Arguments:
+            pref: '1-6' -> бейсбол
+            xeid:  '67Upolsm'
+            xhash: 'yj1b4'
+            args_dict: dict(ftot='3-1', frst_half='3-3')
+
+        Return: {
+            'ftot': {
+                'mean': [1.83, 1.96],
+                'close': [1.85, 1.95],
+                'open': [1.82, 1.97]},
+            'frst_half': {
+                'mean': [1.9, 1.92],
+                'close': [1.9, 1.93],
+                'open': [1.91, 1.92]}}
     """
     try:
-        odds_dict = get_page(xeid, xhash, 'home_away')['E-3-1-0-0-0']['odds']
-        if odds_dict is not None:
-            odds_arry = [odds_dict[item] for item in odds_dict]
-            data = map_odds(odds_arry)
-            if data is not None:
-                return data['home'], data['away']
+        resp_dict = {}
+        for period, value in args_dict.items():
+            # period: 'ftot', value: '3-1'
+            resp_dict[period] = {}
+
+            odds_dict = get_page(pref, xeid, xhash, value)
+            mtch_type = 'E-{}-0-0-0'.format(value)
+
+            tids = odds_dict['close'][mtch_type]['OutcomeID']
+            tids = tids if type(tids) is list else [tids['0'], tids['1']]
+
+            close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
+            open_odds = map_open(odds_dict['history'], tids)
+
+            resp_dict[period]['close'] = close_odds
+            resp_dict[period]['open'] = open_odds
+            resp_dict[period]['mean'] = [
+                round(mean([close_odds[0], open_odds[0]]), 2),
+                round(mean([close_odds[1], open_odds[1]]), 2)]
+
+        return resp_dict
+
     except Exception:
         log_odds('From home_away_func()')
 
 
-def h_cap(xeid, xhash, odd_type):
+def asian_handy(pref, xeid, xhash, args_dict):
     """
-    Get values of total and handyCaps
+        Коэф. на Asian Handicap
 
-    :param
-        xeid:     '67Upolsm'
-        xhash:    'yj1b4'
-        odd_type: 'hcap' or 'total'
-    :return
-        (48, (-7.5, 7.5), (1.87, 1.93), 0.06) or
-        (42, (200.5, 200.5), (1.88, 1.91), 0.03)
+        Arguments:
+            pref: '1-6' -> бейсбол
+            xeid:  '67Upolsm'
+            xhash: 'yj1b4'
+            args_dict: dict(ftot='5-1', frst_half='5-3')
+
+        Returns: {
+            'ftot': {
+                'open': [2.56, 1.52],
+                'close': [2.62, 1.5],
+                'mean': [2.59, 1.51],
+                'value': [-1.5, 1.5]},
+            'frst_half': {
+                'open': [2.21, 1.7],
+                'close': [2.17, 1.72],
+                'mean': [2.19, 1.71],
+                'value': [-0.5, 0.5]}}
     """
     try:
-        arry = []
-        odds_dict = get_page(xeid, xhash, odd_type)
-        if odds_dict is not None:
-            for key, val in odds_dict.iteritems():
-                hcap_value = float(val["handicapValue"])
-                odds_dict = val['odds']
-                odds_arry = [odds_dict[item] for item in odds_dict]
-                if hcap_value % 1 != 0:
-                    data = map_odds(odds_arry)
+        resp_dict = {}
+        for period, value in args_dict.items():  # period: 'ftot', value: '3-1'
 
-                    if data is not None:
-                        arry.append((
-                            data['length'],
-                            (float(hcap_value), -1 * float(hcap_value)),
-                            (data['home'], data['away']),
-                            data['delta']
-                        ))
-            sort_arry = sorted(arry, key=lambda k: k[3], reverse=False)
-            return sort_arry[0] if sort_arry[0][0] > 10 else sort_arry[1]
+            mtch_type, max_odds, handy_value, tids = '', 0, 0, []
+            resp_dict[period] = {}
+
+            odds_dict = get_page(pref, xeid, xhash, value)
+
+            for key, value in odds_dict['close'].items():
+                temp_odds = len(value['odds'].items())
+                if temp_odds > max_odds:
+                    max_odds = temp_odds
+                    mtch_type = key
+                    tids = value['OutcomeID']
+                    handy_value = float(value['handicapValue'])
+
+            resp_dict[period]['value'] = [handy_value, -1 * handy_value]
+            close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
+
+            tids = tids if type(tids) is list else [tids['0'], tids['1']]
+            open_odds = map_open(odds_dict['history'], tids)
+
+            resp_dict[period]['close'] = close_odds
+            resp_dict[period]['open'] = open_odds
+            resp_dict[period]['mean'] = [
+                round(mean([close_odds[0], open_odds[0]]), 2),
+                round(mean([close_odds[1], open_odds[1]]), 2)]
+
+        return resp_dict
+
     except Exception:
-        log_odds.exception('From hcap_totl()')
+        log_odds.exception('From asian_handy()')
 
 
-def over_under():
+def over_under(pref, xeid, xhash, args_dict):
+    """
+        Коэф. на Over/Under
+
+        Arguments:
+            pref: '1-6' -> бейсбол
+            xeid:  '67Upolsm'
+            xhash: 'yj1b4'
+            args_dict: dict(ftot='5-1', frst_half='5-3')
+
+        Returns: {
+            'ftot': {
+                'open': [1.84, 1.97],
+                'close': [1.75, 2.08],
+                'mean': [1.79, 2.02],
+                'value': [10.5, 10.5]},
+            'frst_half': {
+                'open': [1.93, 1.87],
+                'close': [1.84, 1.97],
+                'mean': [1.89, 1.92],
+                'value': [6.0, 6.0]}}
+    """
+    try:
+        resp_dict = {}
+        for period, value in args_dict.items():  # period: 'ftot', value: '3-1'
+
+            mtch_type, max_odds, handy_value, tids = '', 0, 0, []
+            resp_dict[period] = {}
+
+            odds_dict = get_page(pref, xeid, xhash, value)
+
+            for key, value in odds_dict['close'].items():
+                temp_odds = len(value['odds'].items())
+                if temp_odds > max_odds:
+                    max_odds = temp_odds
+                    mtch_type = key
+                    tids = value['OutcomeID']
+                    handy_value = float(value['handicapValue'])
+
+            resp_dict[period]['value'] = [handy_value, handy_value]
+            close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
+
+            tids = tids if type(tids) is list else [tids['0'], tids['1']]
+            open_odds = map_open(odds_dict['history'], tids)
+
+            resp_dict[period]['close'] = close_odds
+            resp_dict[period]['open'] = open_odds
+            resp_dict[period]['mean'] = [
+                round(mean([close_odds[0], open_odds[0]]), 2),
+                round(mean([close_odds[1], open_odds[1]]), 2)]
+
+        return resp_dict
+
+    except Exception:
+        log_odds.exception('From asian_handy()')
+
+
+def odds_even():
+    """
+    Коэф. на Odd or Even
+    """
     pass
 
 
-def get_odds(xeid, xhash):
-    try:
-        mp.freeze_support()
-        pool = mp.Pool(processes=3)
-        res = [
-            pool.apply(home_away, args=(xeid, xhash,)),
-            # ex. pool.apply(hcap_totl, args=(xeid, xhash, 'hcap',)),
-            # ex. pool.apply(hcap_totl, args=(xeid, xhash, 'totl',))
-            pool.apply(h_cap, args=(xeid, xhash, 'hcap',)),
-            pool.apply(over_under, args=(xeid, xhash, 'totl',))
-        ]
-        pool.close()
+def get_odds(sport, xeid, xhash):
+    """         1x2   O/U   H/A   Asian   O/E
+    FTOT        1-1   2-1   3-1    5-1   10-1
+    Full Time   1-2   2-2   3-2    5-2   10-2
+    1st Half    1-3   2-3   3-3    5-3   10-3
+    2nd Half    1-4   2-4   3-4    5-4   10-4
+    1 Quater    1-8   2-8   3-8    5-8   10-8
+    2 Quater    1-9   2-9   3-9    5-9   10-9
+    3 Quater    1-10  2-10  3-10   5-10  10-10
+    4 Quater    1-11  2-11  3-11   5-11  10-11
+    """
+    mp.freeze_support()
+    pool = mp.Pool(processes=3)
 
-        # check if no one is Ecxeption like [(...), (...), None]
-        if None not in res:
-            return res
-    except Exception:
-        log_odds.exception('From get_odds')
+    if sport == 'baseball':
+        resp = {
+            'line': pool.apply(home_away, args=('1-6', xeid, xhash, dict(ftot='3-1', frst_half='3-3'))),
+            'hand': pool.apply(asian_handy, args=('1-6', xeid, xhash, dict(ftot='5-1', frst_half='5-3'))),
+            'totl': pool.apply(over_under, args=('1-6', xeid, xhash, dict(ftot='2-1', frst_half='2-3'))),
+        }
+
+    elif sport == 'basketball':
+        pass
+
+    pool.close()
+    return resp
+
 
 if __name__ == '__main__':
-    page = get_page('INwoa3YK', 'yj4e4', 'home_away')
-    print(page)
+    """ {
+        'line': {
+            'ftot': {
+                'mean': [1.83, 1.96],
+                'close': [1.85, 1.95],
+                'open': [1.82, 1.97]},
+            'frst_half': {
+                'mean': [1.9, 1.92],
+                'close': [1.9, 1.93],
+                'open': [1.91, 1.92]}}
+        'hand': {
+            'ftot': {
+                'open': [2.56, 1.52],
+                'close': [2.62, 1.5],
+                'mean': [2.59, 1.51],
+                'value': [-1.5, 1.5]},
+            'frst_half': {
+                'open': [2.21, 1.7],
+                'close': [2.17, 1.72],
+                'mean': [2.19, 1.71],
+                'value': [-0.5, 0.5]}}
+        'totl': {
+            'ftot': {
+                'open': [1.84, 1.97],
+                'close': [1.75, 2.08],
+                'mean': [1.79, 2.02],
+                'value': [10.5, 10.5]},
+            'frst_half': {
+                'open': [1.93, 1.87],
+                'close': [1.84, 1.97],
+                'mean': [1.89, 1.92],
+                'value': [6.0, 6.0]}},
+        }
+    """
+    # usa/mlb/colorado-rockies-milwaukee-brewers-IuuLnheB
+    xeid, xhash = 'IuuLnheB', 'yj380'
+    resp = get_odds('baseball', xeid, xhash)
+    print(resp)
