@@ -23,7 +23,7 @@ def get_page(pref, xeid, xhash, value):
             pref: адреса '1-6' -> бейсбол
             xeid: 'UX19OwXR'
             xhash: 'yja8d'
-            value: '3-3' -> frst_half
+            value: '3-3' -> frst
 
         Return: {
             'oddsdata': ...,
@@ -131,14 +131,14 @@ def home_away(pref, xeid, xhash, args_dict):
             pref: '1-6' -> бейсбол
             xeid:  '67Upolsm'
             xhash: 'yj1b4'
-            args_dict: dict(ftot='3-1', frst_half='3-3')
+            args_dict: dict(ftot='3-1', frst='3-3')
 
         Return: {
             'ftot': {
                 'mean': [1.83, 1.96],
                 'close': [1.85, 1.95],
                 'open': [1.82, 1.97]},
-            'frst_half': {
+            'frst': {
                 'mean': [1.9, 1.92],
                 'close': [1.9, 1.93],
                 'open': [1.91, 1.92]}}
@@ -178,7 +178,7 @@ def asian_handy(pref, xeid, xhash, args_dict):
             pref: '1-6' -> бейсбол
             xeid:  '67Upolsm'
             xhash: 'yj1b4'
-            args_dict: dict(ftot='5-1', frst_half='5-3')
+            args_dict: dict(ftot='5-1', frst='5-3')
 
         Returns: {
             'ftot': {
@@ -186,7 +186,7 @@ def asian_handy(pref, xeid, xhash, args_dict):
                 'close': [2.62, 1.5],
                 'mean': [2.59, 1.51],
                 'value': [-1.5, 1.5]},
-            'frst_half': {
+            'frst': {
                 'open': [2.21, 1.7],
                 'close': [2.17, 1.72],
                 'mean': [2.19, 1.71],
@@ -235,7 +235,7 @@ def over_under(pref, xeid, xhash, args_dict):
             pref: '1-6' -> бейсбол
             xeid:  '67Upolsm'
             xhash: 'yj1b4'
-            args_dict: dict(ftot='5-1', frst_half='5-3')
+            args_dict: dict(ftot='5-1', frst='5-3')
 
         Returns: {
             'ftot': {
@@ -243,7 +243,7 @@ def over_under(pref, xeid, xhash, args_dict):
                 'close': [1.75, 2.08],
                 'mean': [1.79, 2.02],
                 'value': [10.5, 10.5]},
-            'frst_half': {
+            'frst': {
                 'open': [1.93, 1.87],
                 'close': [1.84, 1.97],
                 'mean': [1.89, 1.92],
@@ -307,9 +307,9 @@ def get_odds(sport, xeid, xhash):
 
     if sport == 'baseball':
         resp = {
-            'line': pool.apply(home_away, args=('1-6', xeid, xhash, dict(ftot='3-1', frst_half='3-3'))),
-            'hand': pool.apply(asian_handy, args=('1-6', xeid, xhash, dict(ftot='5-1', frst_half='5-3'))),
-            'totl': pool.apply(over_under, args=('1-6', xeid, xhash, dict(ftot='2-1', frst_half='2-3'))),
+            'line': pool.apply(home_away, args=('1-6', xeid, xhash, dict(ftot='3-1', frst='3-3'))),
+            'hand': pool.apply(asian_handy, args=('1-6', xeid, xhash, dict(ftot='5-1', frst='5-3'))),
+            'totl': pool.apply(over_under, args=('1-6', xeid, xhash, dict(ftot='2-1', frst='2-3'))),
         }
 
     elif sport == 'basketball':
@@ -321,40 +321,40 @@ def get_odds(sport, xeid, xhash):
 
 if __name__ == '__main__':
     """ {
-        'line': {
-            'ftot': {
-                'mean': [1.83, 1.96],
-                'close': [1.85, 1.95],
-                'open': [1.82, 1.97]},
-            'frst_half': {
-                'mean': [1.9, 1.92],
-                'close': [1.9, 1.93],
-                'open': [1.91, 1.92]}}
         'hand': {
             'ftot': {
-                'open': [2.56, 1.52],
-                'close': [2.62, 1.5],
-                'mean': [2.59, 1.51],
-                'value': [-1.5, 1.5]},
-            'frst_half': {
-                'open': [2.21, 1.7],
-                'close': [2.17, 1.72],
-                'mean': [2.19, 1.71],
-                'value': [-0.5, 0.5]}}
+                'close': [1.9, 1.88],
+                'mean': [1.9, 1.88],
+                'open': [1.89, 1.89],
+                'value': [-3.5, 3.5]},
+            'frst': {
+                'close': [1.87, 1.88],
+                'mean': [1.87, 1.89],
+                'open': [1.86, 1.9],
+                'value': [-1.5, 1.5]}},
+        'line': {
+            'ftot': {
+                'close': [1.58, 2.29],
+                'mean': [1.56, 2.33],
+                'open': [1.55, 2.36]},
+            'frst': {
+                'close': [1.64, 2.14],
+                'mean': [1.62, 2.17],
+                'open': [1.61, 2.19]}},
         'totl': {
             'ftot': {
-                'open': [1.84, 1.97],
-                'close': [1.75, 2.08],
-                'mean': [1.79, 2.02],
-                'value': [10.5, 10.5]},
-            'frst_half': {
-                'open': [1.93, 1.87],
-                'close': [1.84, 1.97],
-                'mean': [1.89, 1.92],
-                'value': [6.0, 6.0]}},
+                'close': [1.84, 1.92],
+                'mean': [1.85, 1.92],
+                'open': [1.85, 1.91],
+                'value': [165.5, 165.5]},
+            'frst': {
+                'close': [1.87, 1.87],
+                'mean': [1.88, 1.86],
+                'open': [1.88, 1.85],
+                'value': [82.5, 82.5]}}
         }
     """
-    # usa/mlb/colorado-rockies-milwaukee-brewers-IuuLnheB
-    xeid, xhash = 'IuuLnheB', 'yj380'
+    # oddsportal.com/basketball/italy/lega-a/venezia-sassari-tGwcHwNl
+    xeid, xhash = 'tGwcHwNl', 'yje54'
     resp = get_odds('baseball', xeid, xhash)
     print(resp)

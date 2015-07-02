@@ -6,72 +6,85 @@ import json
 import requests
 import datetime
 from bs4 import BeautifulSoup
-from mdb import matches, teams
+from mdb import monga
 from logger import log_tabler
 
-""" Описание самой бизнес логики страницы результатов.
-По аргументам url адреса сайт загружает пустой скелет 'table_resalts.html'.
-А дальше при помощи AJAX запроса получает HTML с данными матча ajax_resp.html
+""" Бизнесс логика страницы с таблицой результатов.
+    По аргументам url адреса сайт загружает пустой скелет 'table_resalts.html',
+    потом при помощи AJAX запроса получает HTML с данными матча ajax_resp.html
+    и вставляет их в DOM дерево.
 """
 
 
-def get_table(module, sezon, diapz):
-    """ Строит адресс ссылки из аргументов и pager aka iks от 1 до 60
-        идет на страницу результатов где фильтрует из ~ 160 table rows
-        только 50 шт. и создает массив из данных с классами:
+def get_table(meta, diapz):
+    """ Строит адресс ссылки из аргументов и заданого диапазона.
+        Идет на страницу с таблицой результатов, где фильтрует
+        "table rows" только с матчем и создает массив из данных с классами:
             'even deactivate' и ' deactivate' => данные матча
             'center nob-border' => данные про сезон
             убирает: '', 'table-dummyrow', 'dark center'
         Итерирует по массиву и если матч окончен и не находится в безе данных
-        передает его в 'odds.py' который вытягивает кф.
-        дальше в 'counter.py' выщитывает дельту
-        сохраняет в Монге и возращает 'Ok.' по окончании.
+        передает его в 'odds.py' или по окончании возращает 'Well done.'
+
         Arguments:
-            module @ list  => ('baseball', 'usa', 'mlb')
-            sezon  @ str   => '2015'
-            diapz  @ range => range(1, 50)
-        Return:
-            str => 'Well done.'
+            module @ dict: {
+                'sport': 'basketball',
+                'country': 'italy',
+                'league': 'lega-a',
+                'seas_list': '2014-2015'}
+            sezon @ str: '2015'
+            diapz @ range: range(1, 50)
+
+        Return: list of {
+            'teams': ['Venezia', 'Sassari'],
+            'link': '/basketball/italy/lega-a/venezia-sassari-tGwcHwNl/',
+            'xeid': 'tGwcHwNl',
+            'xhash': 'yjc0b',
+
+            'meta': {
+                'season': '2014-2015',
+                'league': 'lega-a',
+                'country': 'italy',
+                'sport': 'basketball',
+                'seas_type': 'season'},
+
+            'score': {
+                'quat': ['19:21, 19:23, 22:10, 23:29, 7:17'],
+                'full': '90:100',
+                'main': '83:83',
+                'ot': True},
+
+            'date': {
+                'timestamp': 1420399800,
+                'date': '04-01-15',
+                'datetime': '04 Jan 2015 21:30',
+                'time': '21:30'}
+            }
     """
-    sport, strana, liga, ses_num = module
-    # oddsportal.com/basketball/usa/nba/results/#/page/2/
-    # oddsportal.com/basketball/usa/nba-2013-2014/results/#/page/2/
+    # usa/nba/results/#/page/2/ || usa/nba-2013-2014/results/#/page/2/
     domen = 'http://www.oddsportal.com'
     link_template = '{}/{}/{}/{}{}/results/#/page/{}/'
-    season = '' if sezon == 0 else '-' + ses_num[sezon]
+    """
+    Если сезон не этого года, тогда '' иначе '2011-2012'
+    ! переделать на димично
+    """
+    seas_tmpl = '' if meta['season'] in ['2015', '2014-2015'] else '-' + meta['season']
     seas_type = ''
 
     for iks in diapz:
-        url = link_template.format(domen, sport, strana, liga, season, iks)
+        url = link_template.format(domen, meta['sport'], meta['country'],
+                                   meta['league'], seas_tmpl, iks)
         r = requests.get(url)
         if r.status_code != 200:
             print('results page status code is {}'.format(r.status_code))
             break
         r.encoding = 'ISO-8859-1'
 
-        """ get variable page from 'partilas\sceleton.html'
-            var page = new PageTournament({
-                'id':'f7RlGfit','sid':3,'cid':200,'archive':true
-            });
-        """
         r_string = str(r.content)
         starts = r_string.find('var page = new PageTournament') + 30
         ends = r_string.find(');var menu_open')
         params = json.loads(r_string[starts:ends])
 
-        """ build Url
-            http://fb.oddsportal.com/ajax-sport-country-tournament-archive/
-            3/f7RlGfit/X0/1/3/7/?_=1432400166447
-            var request = new Request(
-                '/ajax-sport-country-tournament-archive/' +
-                this.params.sid + '/'            = 3
-                this.params.id + '/' +
-                globals.getBookieHash() + '/' +  = X0 всегда
-                usePremium + '/' +               = 1 всегда
-                globals.timezoneOffset + '/' +   = UTC + 3
-                pageNr + '/'                     = 1 .. 50
-            );
-        """
         link_one = 'http://fb.oddsportal.com/ajax-sport-country-tournament-'
         link_two = 'archive/{}/{}/X0/1/3/{}?_=1432400166447'
         ajax_link = str(link_one + link_two).format(params['sid'], params['id'], iks)
@@ -113,77 +126,74 @@ def get_table(module, sezon, diapz):
 
                 # 'odd deactivate', ' deactivate'
                 elif clss == ' deactivate' or clss == 'odd deactivate':
-                    """
-                    - get_xhash
-                    - get_odds
-                    - counter
-                    - сохранить в массив
-                    """
+
                     match = {}
-                    match['season'] = seas_type
+                    match['meta'] = meta
+                    match['meta']['seas_type'] = seas_type
+
                     match['xeid'] = str(tag.get('xeid'))
-                    """
-                    # проверить матч в базе но что именно брейканетса ?
-                    if get_xeid(match['xeid']):
+
+                    # проверить наличие матча в базе
+                    # 2015-06-23 20:57:16,971 INFO tabler 40wRuQtg match in Base
+                    if monga.match_get_xeid(match['xeid']):
                         log_tabler.info('{} match in Base'.format(match['xeid']))
-                        break
-                    """
-                    # проверить матч окончен ли, что именно брейканетса ?
+                        # Оператор continue начинает следующий проход цикла,
+                        # минуя оставшееся тело цикла (for или while)
+                        continue
+
                     decoded = rows_to_dict(tag.contents)
-                    if decoded == 'This is unfished match':
+                    # проверить окончен ли матч
+                    if decoded == 'unfished':
                         log_tabler.warn('{} match not fished'.format(match['xeid']))
-                        break
+                        continue
 
                     match.update(decoded)
-                    """ {
-                        'date': '10-09-14',
-                        'link': '/baseball/usa/mlb-2014/los-angeles-dodgers-san-diego-padres-r3lHy2G8/',
-                        'datetime': '10 Sep 2014 05:10',
-                        'time': '05:10',
-                        'score': '3:6',
-                        'season': 'season',
-                        'xeid': 'r3lHy2G8',
-                        'teams': ['Los Angeles Dodgers', 'San Diego Padres'],
-                        'timestamp': 1410315000
-                    } """
-                    if not matches.get_xeid(match['xeid']):
-                        break
-                    m_xhash = get_xhash_n_score(match['link'], sport)
-                    match.update(m_xhash)
 
-                    # отправить match в odds.py
-                    # print(match)
+                    xhash_score = get_xhash_score(match['link'], meta['sport'])
+                    match.update(xhash_score)
+
+                    # отправить match в odds.py по одному
+                    if match['score']['ot']:
+                        print(match)
 
             return('Well done.')
 
 
 def rows_to_dict(t_data):
-    """
-        бившый func rows()
-        Внутреняя вспомогательная функция, которая из ковертирует bs4 html
-        таги и возвращает dict()
-        Argument:
+    """ Парсит рядки из таблицы результатов
+        с 'bs4_html_tag' в словарь
+
+        Arguments:
             t_data => bs4 html tag
+
         Return: {
             'link': '/basketball/usa/ ... -miami-heat-67Upolsm/',
             'teams': ['San Antonio Spurs', 'Miami Heat'],
-            'date': '11-06-14',
-            'timestamp': 1402448400,
-            'time': '04:00',
-            'datetime': '11 Jun 2014 04:00'
-        }
+            'date': {
+                'date': '11-06-14',
+                'timestamp': 1402448400,
+                'time': '04:00',
+                'datetime': '11 Jun 2014 04:00'}
+            }
     """
-    match = {}
+    resp_dict = dict(date={}, link='', teams=[])
     """   get date & time   """
     try:
+        """
+        ЭСЛИ МАТЧ НЕ ОКОНЧЕН ИЛИ ОТМЕНЕН
+        return 'unfished'
+        """
         #  table-time datet t1397689200-1-1-0-0
+        date = resp_dict['date']
         data = int(t_data[0].get('class').split(' ')[2].split('-')[0][1:])
-        match['timestamp'] = data
+        date['timestamp'] = data
         # 2014-06-16 03:00:00
         temp = datetime.datetime.fromtimestamp(data)
-        match['datetime'] = temp.strftime('%d %b %Y %H:%M')
-        match['date'] = temp.strftime('%d-%m-%y')
-        match['time'] = temp.strftime('%H:%M')
+        date['date'] = temp.strftime('%d %b %Y')
+        date['time'] = temp.strftime('%H:%M')
+        date['datetime'] = temp.strftime('%d-%m-%y %H:%M')
+        # date['datetime'] = temp.strftime('%d %b %Y %H:%M')
+
     except Exception:
         log_tabler.exception('bs4.tag => date & time\n')
 
@@ -192,42 +202,44 @@ def rows_to_dict(t_data):
         # <a href="/basketball/italy/lega-a/capo-dorlando-milano-dzzJsnCt/">
         #     <span class="bold">Capo d'Orlando</span> - Milano
         # </a>
-        # 'Capo d'Orlando - Milano'
-        match['teams'] = str(t_data[1].find('a').text.replace("\\'", "'")).split(' - ')
-        home, away = match['teams']
-        if teams.find(home):
-            print('Team {} in DB'.format(home))
-        if not teams.find(away):
-            print('Team {} not in DB'.format(away))
+        resp_dict['teams'] = str(t_data[1].find('a').text.replace("\\'", "'")).split(' - ')
+
+        # проверить наличие команды в БД и выкинуть ошипку
+        home, away = resp_dict['teams']
+        if not monga.team_find(home):
+            raise Exception('Team \'{}\' not in DB'.format(home))
+        if not monga.team_find(away):
+            raise Exception('Team \'{}\' not in DB'.format(away))
 
     except Exception:
         log_tabler.exception('bs4.tag => teams\n')
 
     """   get match link """
     try:
-        match['link'] = str(t_data[1].find('a').get('href'))
+        resp_dict['link'] = str(t_data[1].find('a').get('href'))
     except Exception:
         log_tabler.exception('bs4.tag => link\n')
 
-    return match
+    return resp_dict
 
 
-def get_xhash_n_score(arg_url, sport):
-    """
-        Идет на странице матча, вырезает 'xhash' и развернутые результати
-        - xhash (нужен для JSON запросов коеф. в 'odds.py')
-        - Final result: ('22:29, 25:11, 30:18, 27:29')
+def get_xhash_score(arg_url, sport):
+    """ Идет на страницу матча, вырезает 'xhash'
+        и парсит развернутые результати
 
-        Arguments
+        Arguments:
             match_url '/basketball/usa/ ... -miami-heat-67Upolsm/'
-        Return {
-            'ot': False,
-            'xhash': 'yj1b4',
-            'score': [104, 87],
-            'res_box': '22:29, 25:11, 30:18, 27:29',
+            score: 'basketball'
+        Return: {
+            'score': {
+                'main': '67:67',
+                'ot': True,
+                'quat': ['11:18, 19:12, 18:21, 19:16, 9:8'],
+                'full': '76:75'},
+            'xhash': 'yj84d'
         }
     """
-    match = {}
+    resp_dict = dict(score={})
     try:
         # partilas\match_page.html 1417
         p = requests.get('http://www.oddsportal.com' + arg_url)
@@ -242,10 +254,9 @@ def get_xhash_n_score(arg_url, sport):
             # first hash temp var
             fhash = ''.join(raw_text[frst:last].split('%')[1:])
             xhash = bytes.fromhex(fhash).decode('utf-8')
-            if len(xhash) != 5:
-                log_tabler.error('page => xhash is %s', xhash)
-                return AssertionError('ASSERT: xhash is ', xhash)
-            match['xhash'] = xhash
+
+            resp_dict['xhash'] = xhash
+
         except Exception:
             log_tabler.exception('page => xhash')
 
@@ -257,40 +268,42 @@ def get_xhash_n_score(arg_url, sport):
 
             #  <p class="result">
             mtch_rslt = html.find('p').get('class')[0]
-            if mtch_rslt == 'result':
-                if sport == 'basketball':
-                    if re.search('OT', text):
-                        match['ot'] = True
-                        match['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
-                        # ['115:115', '27:25, 17:25, 21:25, 30:20, 13:0']
-                        re_find = re.findall('\(([\d+:\d+,*\s*]+)\)', text)
-                        # '115:115'
-                        match['main'] = re_find[0]
-                        # ['27:25, 17:25, 21:25, 30:20, 13:0']
-                        match['quat'] = re_find[1:]
-                    else:
-                        match['ot'] = False
-                        match['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
-                        match['quat'] = re.findall('\((.+)\)', text)
-                elif sport == 'baseball':
-                    match['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
-                    match['quat'] = re.findall('\(([\d+:\d+,*\s*]+)\)', text)[0]
-                    match['ot'] = False if len(match['quat'].split(', ')) == 9 else True
+            score = resp_dict['score']
+            if sport == 'basketball':
+                if re.search('OT', text):
+                    score['ot'] = True
+                    score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
+                    # ['115:115', '27:25, 17:25, 21:25, 30:20, 13:0']
+                    re_find = re.findall('\(([\d+:\d+,*\s*]+)\)', text)
+                    # '115:115'
+                    score['main'] = re_find[0]
+                    # ['27:25, 17:25, 21:25, 30:20, 13:0']
+                    score['quat'] = re_find[1:]
+                else:
+                    score['ot'] = False
+                    score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
+                    score['quat'] = re.findall('\((.+)\)', text)
+
+            elif sport == 'baseball':
+                score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
+                score['quat'] = re.findall('\(([\d+:\d+,*\s*]+)\)', text)[0]
+                score['ot'] = False if len(score['quat'].split(', ')) == 9 else True
+
             # <p class="result-alert"><span class="bold">postponed</span></p>
             elif mtch_rslt == 'result-alert':
                 log_tabler.info('Result Alert (match was canseled)')
-            else:
-                log_tabler.error('There is no resullts')
+
         except Exception:
             log_tabler.exception('page => score')
 
-        return match
+        return resp_dict
 
     except Exception:
         log_tabler('Smth wrong with rows_func')
 
 if __name__ == '__main__':
-    modl_list = ('basketball', 'italy', 'lega-a', ['2014-2015', '2013-2014', '2012-2013'])
-    diapazon = range(2, 3)
-    resp = get_table(modl_list, 0, diapazon)
-    # print(resp)
+    modl_list = dict(sport='basketball', country='italy',
+                     league='lega-a', season='2014-2015')
+    diapazon = range(4, 5)
+    resp = get_table(modl_list, diapazon)
+    print(resp)

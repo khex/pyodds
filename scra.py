@@ -44,16 +44,18 @@ from libs.db import get_xeid
 
 # пока мало модулей, то их не выгодно тянуть из базы,
 # разве что потом попробовать 'pickel'
-shts = ['2015', '2014', '2013', '2012', '2011',
+shot = ['2015', '2014', '2013', '2012', '2011',
         '2010', '2009', '2008', '2007', '2006']
-lngs = ['2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011',
+leng = ['2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011',
         '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006']
 mhsh_dict = {
-    'bsusml': ('baseball', 'usa', 'mlb', shts),
-    'bbitla': ('basketball', 'italy', 'lega-a', lngs),
-    'bbusnb': ('basketball', 'usa', 'nba', lngs)
+    'bsusml': dict(sport='baseball', country='usa', league='mlb', seas_list=shot),
+    'bbitla': dict(sport='basketball', country='italy', league='lega-a', seas_list=leng),
+    'bbusnb': dict(sport='basketball', country='usa', league='nba', seas_list=leng)
 }
-
+"""
+Посылает массив из годов, зачем ?
+"""
 args = docopt(__doc__, version='0.4.123')
 season, mhsh = args['<seas>'], args['<mhsh>']
 module = mhsh_dict[mhsh]

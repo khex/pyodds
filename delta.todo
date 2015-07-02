@@ -1,19 +1,28 @@
 modules
- ☐ Выкидыватаь ошибку, если MongoDB не доступна
- ☐ define Schemas and test "db.teams.find()"
  ☐ скопировать в каталог 'pyodd'
 
 libs/mdb.py
- ☐ переписать все анотации к функциям
- ☐ переписать все log сообщения
- ☐ в начале проверить доступность базы
+ ☐ дописать match_get_xeid
  ☐ create "teams" CR
+ ☐ разбить на классы
 
 libs/tabler.py
- ☐ переписать все анотации к функциям
+ ☐ 'rows_to_dict' -> неоконченый матч
  ☐ переписать все log сообщения
 
 libs/odds.py
  ☐ написать 'one_x_two()'
  ☐ написать 'odds_even()'
  ☐ переписать все log сообщения
+ ☐ переписать Builder в класс
+
+temp/class_Match.py
+  ☐ дописать 'count_line'
+  ☐ дописать 'count_handy'
+  ☐ дописать 'count_total'
+  ☐ дописать 'count_i_tot'
+  ☐ где 'ftot', а где 'one_x_two'
+  ☐ как и где прикрутить коэфициенты?
+  ☐ где добавить 'tid'?
+
+v0.4.142 + 0
