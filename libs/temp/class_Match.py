@@ -122,17 +122,17 @@ class Match(UserDict):
          self['away']['ftot']['resalt']) = once_scrd
 
         scor = [int(s) for s in dd['score']['full'].split(':')]
-        line = self.count_line(scor, dd['odds']['line']['ftot']['mean'])
-        hand = self.count_handy()
-        totl = self.count_total()
+        line = self.count_line(scor, dd['odds']['line']['ftot'])
+        hand = self.count_handy(scor, dd['odds']['hand']['ftot'])
+        totl = self.count_total(scor, dd['odds']['totl']['ftot'])
         itot = self.count_i_tot()
 
         # делает срезы из массивов 1й дельта, а 2й прибыль
         self['home']['ftot']['delta'], self['away']['ftot']['delta'] = [
-            [line[n][0], hand[n][0], totl[n][0], itot[n][0]] for n in range(0, 2)]
+            [line[0][n], hand[0][n], totl[0][n], itot[0][n]] for n in range(0, 2)]
 
         self['home']['ftot']['profit'], self['away']['ftot']['profit'] = [
-            [line[n][1], hand[n][1], totl[n][1], itot[n][1]] for n in range(0, 2)]
+            [line[1][n], hand[1][n], totl[1][n], itot[1][n]] for n in range(0, 2)]
 
         """ counting First Half if Odds exist
         if dd['odds']['line']['frst']:
@@ -146,10 +146,10 @@ class Match(UserDict):
              self['away']['frst']['resalt']) = once_scrd
 
             self['home']['frst']['delta'], self['away']['frst']['delta'] = [
-                [line[n][0], hand[n][0], totl[n][0], itot[n][0]] for n in range(0, 2)]
+                [line[0][n], hand[0][n], totl[0][n], itot[0][n]] for n in range(0, 2)]
 
             self['home']['frst']['profit'], self['away']['frst']['profit'] = [
-                [line[n][1], hand[n][1], totl[n][1], itot[n][1]] for n in range(0, 2)]
+                [line[1][n], hand[1][n], totl[1][n], itot[1][n]] for n in range(0, 2)]
         """
 
     def count_result(self, score):
@@ -185,43 +185,58 @@ class Match(UserDict):
                 odds: [1.54, 2.25]
             Return: [[1, 54], [-1, -100]]
         """
-        print(score, odds)
+        home_win = True if score[0] > score[1] else False
         delta, profit = [], []
 
+        # подсчет результатов
         if abs(sum(score)) <= 0.1:
-            delta = [3, -3] if score[0] > score[1] else [-3, 3]
+            delta = [3, -3] if home_win else [-3, 3]
         else:
-            if odds[0] < odds[1]:
-                delta = [1, -2] if score[0] > score[1] else [-1, 2]
-
+            if odds['mean'][0] < odds['mean'][1]:
+                delta = [1, -2] if home_win else [-1, 2]
             else:
-                delta = [2, -1] if score[0] > score[1] else [-2, 1]
+                delta = [2, -1] if home_win else [-2, 1]
 
-        if score[0] > score[1]:
-            profit = [int((odds[0] - 1) * 100), -100]
+        # подсчет прибыли
+        if home_win:
+            profit = [int((odds['mean'][0] - 1) * 100), -100]
         else:
-            profit = [-100, int((odds[1] - 1) * 100)]
+            profit = [-100, int((odds['mean'][1] - 1) * 100)]
 
-        # return [[1, -1], [54, 100]]
-        return [[delta[0], profit[0]],
-                [delta[1], profit[1]]]
+        return [delta, profit]
 
-    def count_handy(self, score=None, handy=None):
+    def count_handy(self, score, handy):
         """
         Считает дельту по форе & профит:
         Return:
             (7.5, -7.5)
         """
-        # return [[-13.5, 13.5], [90, -100]]
-        return [[-13.5, 90], [13.5, -100]]
+        delta = [self['home']['ftot']['resalt'][1] + handy['value'][0],
+                 self['away']['ftot']['resalt'][1] + handy['value'][1]]
 
-    def count_total(self, score=None, total=None):
+        # подсчет прибыли
+        if delta[0] > delta[1]:
+            profit = [int((handy['mean'][0] - 1) * 100), -100]
+        else:
+            profit = [-100, int((handy['mean'][1] - 1) * 100)]
+
+        return [delta, profit]
+
+    def count_total(self, score, total):
         """ Считатет дельту тотала & профит """
-        return [[24.5, 92], [24.5, 92]]
+        delta = self['home']['ftot']['resalt'][2] - total['value'][0]
+
+        # подсчет прибыли
+        if delta > 0:
+            profit = int((total['mean'][0] - 1) * 100)
+        else:
+            profit = [-100, -100]
+
+        return [[delta, delta], [profit, profit]]
 
     def count_i_tot(self, score=None, total=None):
         """ Считатет инд. тотал & профит """
-        return [[5.5, 89], [18.5, 89]]
+        return [[5.5, 18.5], [86, 89]]
 
 if __name__ == '__main__':
     data = {

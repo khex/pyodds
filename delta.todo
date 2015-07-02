@@ -17,12 +17,7 @@ libs/odds.py
  ☐ переписать Builder в класс
 
 temp/class_Match.py
-  ☐ дописать 'count_line'
-  ☐ дописать 'count_handy'
-  ☐ дописать 'count_total'
   ☐ дописать 'count_i_tot'
-  ☐ где 'ftot', а где 'one_x_two'
   ☐ как и где прикрутить коэфициенты?
+  ☐ где 'ftot', а где 'one_x_two'
   ☐ где добавить 'tid'?
-
-v0.4.142 + 0
