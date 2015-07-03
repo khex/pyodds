@@ -2,6 +2,7 @@ modules
  ☐ скопировать в каталог 'pyodd'
 
 libs/mdb.py
+ ☐ ПОЛНАЯ ХЕРНЯ МЕЖДУ МОЛДУЛЯМИ И mdb.py
  ☐ дописать match_get_xeid
  ☐ create "teams" CR
  ☐ разбить на классы

@@ -7,6 +7,8 @@ import requests
 import datetime
 from bs4 import BeautifulSoup
 from mdb import monga
+from odds import get_odds
+from builder import Match
 from logger import log_tabler
 
 """ Бизнесс логика страницы с таблицой результатов.
@@ -74,6 +76,7 @@ def get_table(meta, diapz):
     for iks in diapz:
         url = link_template.format(domen, meta['sport'], meta['country'],
                                    meta['league'], seas_tmpl, iks)
+        print(url)
         r = requests.get(url)
         if r.status_code != 200:
             print('results page status code is {}'.format(r.status_code))
@@ -152,9 +155,10 @@ def get_table(meta, diapz):
                     xhash_score = get_xhash_score(match['link'], meta['sport'])
                     match.update(xhash_score)
 
-                    # отправить match в odds.py по одному
-                    if match['score']['ot']:
-                        print(match)
+                    match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'])
+
+                    m = Match(match)
+                    print(m)
 
             return('Well done.')
 
@@ -203,13 +207,14 @@ def rows_to_dict(t_data):
         #     <span class="bold">Capo d'Orlando</span> - Milano
         # </a>
         resp_dict['teams'] = str(t_data[1].find('a').text.replace("\\'", "'")).split(' - ')
-
+        """
         # проверить наличие команды в БД и выкинуть ошипку
         home, away = resp_dict['teams']
         if not monga.team_find(home):
             raise Exception('Team \'{}\' not in DB'.format(home))
         if not monga.team_find(away):
             raise Exception('Team \'{}\' not in DB'.format(away))
+        """
 
     except Exception:
         log_tabler.exception('bs4.tag => teams\n')
@@ -275,25 +280,29 @@ def get_xhash_score(arg_url, sport):
                     score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
                     # ['115:115', '27:25, 17:25, 21:25, 30:20, 13:0']
                     re_find = re.findall('\(([\d+:\d+,*\s*]+)\)', text)
-                    # '115:115'
-                    score['main'] = re_find[0]
-                    # ['27:25, 17:25, 21:25, 30:20, 13:0']
-                    score['quat'] = re_find[1:]
+                    score['main'] = re_find[0]  # '115:115'
+                    # '27:25, 17:25, 21:25, 30:20, 13:0'
+                    score['quat'] = re_find[1]
                 else:
                     score['ot'] = False
                     score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
                     score['quat'] = re.findall('\((.+)\)', text)
 
             elif sport == 'baseball':
-                score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
-                score['quat'] = re.findall('\(([\d+:\d+,*\s*]+)\)', text)[0]
+                # "Final result 1:2 (0:0, 0:0, 0:1, 1:0, 0:0, 0:0, 0:0, 0:0, 0:0, 0:1)"
+                # "Final result 5:3 (0:0, 0:0, 0:0, 0:0, 0:0, 0:0, 1:1, 4:0, X:2)"
+                score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]  # '1:2'
+                score['quat'] = re.findall('\(([X:\d+,*\s*]+)\)', text)[0]
                 score['ot'] = False if len(score['quat'].split(', ')) == 9 else True
 
             # <p class="result-alert"><span class="bold">postponed</span></p>
             elif mtch_rslt == 'result-alert':
                 log_tabler.info('Result Alert (match was canseled)')
+            else:
+                raise BaseException('Smth with Score scrapper')
 
         except Exception:
+            print('\n{}\n'.format(text))
             log_tabler.exception('page => score')
 
         return resp_dict
@@ -302,8 +311,11 @@ def get_xhash_score(arg_url, sport):
         log_tabler('Smth wrong with rows_func')
 
 if __name__ == '__main__':
-    modl_list = dict(sport='basketball', country='italy',
-                     league='lega-a', season='2014-2015')
-    diapazon = range(4, 5)
+
+    # http://www.oddsportal.com/baseball/usa/nba/results/#/page/1/
+    # http://www.oddsportal.com/baseball/usa/mlb/results/#/page/1/
+    modl_list = dict(sport='baseball', country='usa',
+                     league='mlb', season='2015')
+    diapazon = range(1, 2)
     resp = get_table(modl_list, diapazon)
     print(resp)

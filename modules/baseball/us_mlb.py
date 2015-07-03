@@ -4,8 +4,8 @@
 import sys
 sys.path.append('C:/Users/qm69/Code/delta_odds/libs')
 
-from mdb import module
-from mdb import team
+from mdb import modules
+from mdb import teams
 
 m_data = {
     "mhsh": "bsusml",  # unique
@@ -17,7 +17,7 @@ m_data = {
 
 year = ['2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008', '2007', '2006', '2005']
 
-teams = [
+team_dict = [
     dict(tid=70, opid="", full="Arizona Diamondbacks", short="arizona-diamondbacks", seasons=year),
     dict(tid=71, opid="", full="Atlanta Braves", short="atlanta-braves", seasons=year),
     dict(tid=72, opid="", full="Baltimore Orioles", short="baltimore-orioles", seasons=year),
@@ -50,8 +50,8 @@ teams = [
     dict(tid=99, opid="", full="Washington Nationals", short="washington-nationals", seasons=year),
 ]
 
-m_data = module.save_n_back(m_data)
-for t in teams:
+m_data = modules.save_n_back(m_data)
+for t in team_dict:
     t['module'] = m_data
 
-team.save(teams)
+teams.save(team_dict)

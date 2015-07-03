@@ -291,6 +291,24 @@ def odds_even():
     pass
 
 
+def itot_base(line, total):
+    """ write smth here """
+    if total == 5.5:
+        return 2.5
+    elif total == 6.5:
+        return 3.5 if line < 2 else 2.5
+    elif total == 7.5:
+        return 4.5 if line < 1.7 else 3.5 if line < 2.7 else 2.5
+    elif total == 8.5:
+        return 4.5 if line < 1.9 else 3.5
+    elif total == 9.5:
+        return 5.5 if line < 1.55 else 4.5 if line < 2.2 else 3.5
+    elif total == 10.5:
+        return 5.5 if line < 2 else 4.5
+    else:
+        return 0
+
+
 def get_odds(sport, xeid, xhash):
     """         1x2   O/U   H/A   Asian   O/E
     FTOT        1-1   2-1   3-1    5-1   10-1
@@ -309,13 +327,17 @@ def get_odds(sport, xeid, xhash):
         resp = {
             'line': pool.apply(home_away, args=('1-6', xeid, xhash, dict(ftot='3-1', frst='3-3'))),
             'hand': pool.apply(asian_handy, args=('1-6', xeid, xhash, dict(ftot='5-1', frst='5-3'))),
-            'totl': pool.apply(over_under, args=('1-6', xeid, xhash, dict(ftot='2-1', frst='2-3'))),
-        }
+            'totl': pool.apply(over_under, args=('1-6', xeid, xhash, dict(ftot='2-1', frst='2-3')))}
+        pool.close()
+        itot = {'ftot': {
+                'mean': [1.89, 1.89], 'open': [0, 0], 'close': [0, 0],
+                'value': [itot_base(resp['line']['ftot']['mean'][0], resp['totl']['ftot']['value'][0]),
+                          itot_base(resp['line']['ftot']['mean'][1], resp['totl']['ftot']['value'][1])]}}
+        resp['itot'] = itot
 
     elif sport == 'basketball':
         pass
 
-    pool.close()
     return resp
 
 
@@ -354,7 +376,7 @@ if __name__ == '__main__':
                 'value': [82.5, 82.5]}}
         }
     """
-    # oddsportal.com/basketball/italy/lega-a/venezia-sassari-tGwcHwNl
-    xeid, xhash = 'tGwcHwNl', 'yje54'
-    resp = get_odds('baseball', xeid, xhash)
+    # baseball/usa/mlb/toronto-blue-jays-boston-red-sox-4G79dfXC
+    sport, xeid, xhash = 'baseball', '4G79dfXC', 'yjd58'
+    resp = get_odds(sport, xeid, xhash)
     print(resp)

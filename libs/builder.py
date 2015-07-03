@@ -1,304 +1,303 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from collections import UserDict
 from datetime import datetime
-from logger import log_db
-
-nba_teams = [('Atlanta Hawks', 'Atlanta')]
-link_names = ['atlanta-hawks', 'boston-celtics']
-"""
-def get_teams(team_full):
-    for team in nba_teams:
-        if team_full == team[0]:
-            return team
-"""
+# from logger import log_db
 
 
-def stat_line(score, line):
-    """
-    Подсчет результата матча:
-        фаворит выиграл: 1
-        аутсайдер выиграл: 2
-        фаворит проиграл: -2
-        аутсайдер проиграл: -1
-    Arguments:
-        score: [8, 5]
-        line: [1.54, 2.25]
-    Return:
-        [1, -1]
-    """
-    try:
-        if score[0] > score[1]:
-            return [1, -1] if line[0] < line[1] else [2, -2]
-        else:
-            return [-2, 2] if line[0] < line[1] else [-1, 1]
-    except Exception:
-        log_db.exception('From stat line')
+class Match(UserDict):
+    """docstring for Match @ v0.4.142 {
+        'league': 'lega-a',
+        'xeid': 'tGwcHwNl',
+        'season': '2014-2015',
+        'link': '/basketball/italy/lega-a/venezia-sassari-tGwcHwNl/',
+        'sport': 'basketball',
+        'score': {
+            'quat': ['19:21, 19:23, 22:10, 23:29, 7:17'],
+            'ot': True,
+            'full': '90:100',
+            'main': '83:83'},
+        'country': 'italy',
+        'seas_type': 'season',
+        'date': {
+            'scraptime': '2015-07-01 22:36',
+            'timestamp': 1402448400,
+            'datetime': '04-01-15 04:00',
+            'time': '04:00',
+            'date': '11 Jun 2014'},
+        'home': {
+            'team': 'Venezia',
+            'ftot': {
+                'delta': [1, -13.5, 24.5, 5.5],
+                'profit': [54, 90, 92, 89],
+                'resalt': [False, -10, 190, 90]},
+            'frst': {
+                'delta': [1, -13.5, 24.5, 5.5],
+                'profit': [54, 90, 92, 89],
+                'resalt': [False, -10, 190, 90]}},
+        'away': {
+            'team': 'Sassari',
+            'ftot': {
+                'delta': [-1, 13.5, 24.5, 18.5],
+                'profit': [100, -100, 92, 89],
+                'resalt': [True, 10, 190, 100]},
+            'frst': {
+                'delta': [-1, 13.5, 24.5, 18.5],
+                'profit': [100, -100, 92, 89],
+                'resalt': [True, 10, 190, 100]}}
+    }"""
 
-
-def profit(score, odds):
-    """
-    Подсчитывает чистую прибыли при ставке на событие
-    Функция не используеться !!!
-    """
-    if score[0] > score[1]:
-        return [int(round((odds[0] - 1) * 100, 2)), -100]
-    else:
-        return [-100, int(round((odds[0] - 1) * 100, 2))]
-
-
-def count_totl(side, score):
-    """
-    Считает дельту по тоталу
-    Arguments:
-        side: 'home' || 'away'
-        score: [112, 98]
-    Return:
-        [True, 14, 210, 112]
-        [False, -14, 210, 98]
-    """
-    try:
-        total = score[0] + score[1]
-        if side == 'home':
-            return [True if score[0] > score[1] else False, score[0] - score[1], total, score[0]]
-        else:
-            return [True if score[1] > score[0] else False, score[1] - score[0], total, score[1]]
-    except Exception:
-        log_db.exception('From count_totl')
-
-
-def count_handy(score, handy):
-    """
-    Считает дельту по форе
-    Return:
-        (7.5, -7.5)
-    """
-    home, away = score[0] - score[1], score[1] - score[0]
-    if handy[0] < handy[1]:
-        return home + handy[0], away + handy[1]
-    else:
-        return home + handy[0], away + handy[1]
-
-
-def count_itot(handy, total):
-    """
-    Count individual total from
-    total and handyCap value
-
-    Arguments:
-        handy: (48, (-7.5, 7.5), (1.87, 1.93), 0.06)
-        total: (42, (200.5, 200.5), (1.88, 1.91), 0.03)
-    Return:
-        (98.5, 93,5)
-    """
-    hand = abs(handy[1][0])
-    half = (total[1][0] - abs(handy[1][0])) / 2
-    if half % 1 == 0:
-        if handy[1][0] < 0:
-            return half + hand, half + 0.5
-        else:
-            return half + 0.5, half + hand
-    else:
-        if handy[1][0] < 0:
-            return half + hand - 0.5, half
-        else:
-            return half, half + hand - 0.5
-
-
-def builder(mdata):
-    """
-        Buid match results
-
-        Arguments: mdata =
-            'teams': ['Venezia', 'Sassari']
-            'link': '/basketball/italy/lega-a/venezia-sassari-tGwcHwNl/'
-            'xeid': 'tGwcHwNl'
-            'xhash': 'yjc0b'
-
-            'meta':
-                'season': '2014-2015'
-                'league': 'lega-a'
-                'country': 'italy'
-                'sport': 'basketball'
-                'seas_type': 'season'
-
-            'score':
-                'quat': ['19:21, 19:23, 22:10, 23:29, 7:17']
-                'full': '90:100'
-                'main': '83:83'
-                'ot': True
-
-            'date':
-                'date': '11 Jun 2014'
-                'time': '04:00'
-                'datetime': '04-01-15 04:00'
-                'timestamp': 1402448400
-
-            'odds':
-                'line': {
-                    'ftot': {'mean': [1.83, 1.96], 'close': [1.85, 1.95],
-                             'open': [1.82, 1.97]},
-                    'frst': {'mean': [1.9, 1.92], 'close': [1.9, 1.93],
-                             'open': [1.91, 1.92]}}
+    def __init__(self, dd):
+        """ dd as dict_data {
+            'teams': ['Venezia', 'Sassari'],
+            'link': '/basketball/italy/lega-a/venezia-sassari-tGwcHwNl/',
+            'xeid': 'tGwcHwNl',
+            'xhash': 'yjc0b',
+            'meta': {
+                'season': '2014-2015',
+                'league': 'lega-a',
+                'country': 'italy',
+                'sport': 'basketball',
+                'seas_type': 'season'},
+            'score': {
+                'quat': ['19:21, 19:23, 22:10, 23:29, 7:17'],
+                'full': '90:100',
+                'main': '83:83',
+                'ot': True},
+            'date': {
+                'date': '11 Jun 2014',
+                'time': '04:00',
+                'datetime': '04-01-15 04:00',
+                'timestamp': 1402448400},
+            'odds': {
                 'hand': {
-                    'ftot': {'value': [-1.5, 1.5], 'mean': [2.59, 1.51],
-                             'open': [2.56, 1.52], 'close': [2.62, 1.5]},
-                    'frst': {'mean': [2.19, 1.71], 'value': [-0.5, 0.5],
-                                  'open': [2.21, 1.7], 'close': [2.17, 1.72]}}
+                    'ftot': {
+                        'close': [1.9, 1.88],
+                        'mean': [1.9, 1.88],
+                        'open': [1.89, 1.89],
+                        'value': [-3.5, 3.5]},
+                    'frst': {
+                        'close': [1.87, 1.88],
+                        'mean': [1.87, 1.89],
+                        'open': [1.86, 1.9],
+                        'value': [-1.5, 1.5]}},
+                'line': {
+                    'ftot': {
+                        'close': [1.58, 2.29],
+                        'mean': [1.56, 2.33],
+                        'open': [1.55, 2.36]},
+                    'frst': {
+                        'close': [1.64, 2.14],
+                        'mean': [1.62, 2.17],
+                        'open': [1.61, 2.19]}},
                 'totl': {
-                    'ftot': {'mean': [1.79, 2.02], 'value': [10.5, 10.5],
-                             'open': [1.84, 1.97], 'close': [1.75, 2.08]},
-                    'frst': {'mean': [1.89, 1.92], 'value': [6.0, 6.0],
-                             'open': [1.93, 1.87], 'close': [1.84, 1.97]}}}
+                    'ftot': {
+                        'close': [1.84, 1.92],
+                        'mean': [1.85, 1.92],
+                        'open': [1.85, 1.91],
+                        'value': [165.5, 165.5]},
+                    'frst': {
+                        'close': [1.87, 1.87],
+                        'mean': [1.88, 1.86],
+                        'open': [1.88, 1.85],
+                        'value': [82.5, 82.5]}}}
+        """
 
+        self.data = {'home': {'ftot': {}, 'frst': {}},
+                     'away': {'ftot': {}, 'frst': {}}}
+
+        self.update(dd['meta'])
+        self['link'] = dd['link']
+        self['xeid'] = dd['xeid']
+        self['date'] = dd['date']
+        self['score'] = dd['score']
+
+        self['date']['scraptime'] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        self['home']['team'], self['away']['team'] = dd['teams']
+
+        # counting Full Time & Over Time
+        once_scrd = self.count_result(dd['score']['full'])
+        (self['home']['ftot']['resalt'],
+         self['away']['ftot']['resalt']) = once_scrd
+
+        scor = [int(s) for s in dd['score']['full'].split(':')]
+        line = self.count_line(scor, dd['odds']['line']['ftot'])
+        hand = self.count_handy(scor, dd['odds']['hand']['ftot'])
+        totl = self.count_total(scor, dd['odds']['totl']['ftot'])
+        itot = self.count_i_tot(scor, dd['odds']['itot']['ftot'])
+
+        # делает срезы из массивов 1й дельта, а 2й прибыль
+        self['home']['ftot']['delta'], self['away']['ftot']['delta'] = [
+            [line[0][n], hand[0][n], totl[0][n], itot[0][n]] for n in range(0, 2)]
+
+        self['home']['ftot']['profit'], self['away']['ftot']['profit'] = [
+            [line[1][n], hand[1][n], totl[1][n], itot[1][n]] for n in range(0, 2)]
+
+        """ counting First Half if Odds exist
+        if dd['odds']['line']['frst']:
+            line = self.count_line()
+            hand = self.count_handy()
+            totl = self.count_total()
+            itot = self.count_i_tot()
+
+            once_scrd = self.count_result(dd['score']['full'])
+            (self['home']['frst']['resalt'],
+             self['away']['frst']['resalt']) = once_scrd
+
+            self['home']['frst']['delta'], self['away']['frst']['delta'] = [
+                [line[0][n], hand[0][n], totl[0][n], itot[0][n]] for n in range(0, 2)]
+
+            self['home']['frst']['profit'], self['away']['frst']['profit'] = [
+                [line[1][n], hand[1][n], totl[1][n], itot[1][n]] for n in range(0, 2)]
+        """
+
+    def count_result(self, score):
+        """
+        Возвращает результат в очках для каждой команды
+
+        Arguments: score @ str: '90:100'
+
+        Return: [ [True, 14, 210, 112], [False, -14, 210, 98]]
+        """
+        score = [int(s) for s in score.split(':')]  # [90, 100]
+        reslt = [True, False] if score[0] > score[1] else [False, True]
+        handy = [score[0] - score[1], score[1] - score[0]]
+        total = sum(score)
+
+        return [[reslt[n], handy[n], total, score[n]] for n in range(0, 2)]
+        """
+        return [[reslt[0], handy[0], total, score[0]],
+                [reslt[1], handy[1], total, score[1]]]
+        except Exception:
+            log_db.exception('From count_totl')
+        """
+
+    def count_line(self, score, odds):
+        """ Подсчет результата матча & профит:
+                    выиграл проигр
+            равный      1    -1
+            фаворит     2    -2
+            аутсайдер   3    -3
+
+            Arguments:
+                score: [90, 100]
+                odds: [1.54, 2.25]
+            Return: [[1, 54], [-1, -100]]
+        """
+        home_win = True if score[0] > score[1] else False
+        delta, profit = [], []
+
+        # подсчет результатов
+        if abs(sum(score)) <= 0.1:
+            delta = [3, -3] if home_win else [-3, 3]
+        else:
+            if odds['mean'][0] < odds['mean'][1]:
+                delta = [1, -2] if home_win else [-1, 2]
+            else:
+                delta = [2, -1] if home_win else [-2, 1]
+
+        # подсчет прибыли
+        if home_win:
+            profit = [int((odds['mean'][0] - 1) * 100), -100]
+        else:
+            profit = [-100, int((odds['mean'][1] - 1) * 100)]
+
+        return [delta, profit]
+
+    def count_handy(self, score, handy):
+        """
+        Считает дельту по форе & профит:
         Return:
-          + 'sport': 'basketball'
-          + 'country': 'usa'
-          + 'league': 'NBA'
-          + 'season': '2014/2015'
-          + 'seas_type': 'play-offs'
-          + 'link': 'http...san-antonio-spurs-miami-heat-67Upolsm/'
-          + 'xeid': '67Upolsm'
+            (7.5, -7.5)
+        """
+        delta = [self['home']['ftot']['resalt'][1] + handy['value'][0],
+                 self['away']['ftot']['resalt'][1] + handy['value'][1]]
 
-          + 'datetime':
-                'date': '11-06-14'
-                'time': '04:00'
-                'datetime': '11 Jun 2014 04:00'
-                'timestamp': 1402448400
-                'scraptime': '2014-11-25 13:50:44'
+        # подсчет прибыли
+        if delta[0] > delta[1]:
+            profit = [int((handy['mean'][0] - 1) * 100), -100]
+        else:
+            profit = [-100, int((handy['mean'][1] - 1) * 100)]
 
-          + 'score':
-                'full': '88:87'
-                'ot': True
-                'main': '78:78'
-                'quat': ['19:15, 19:23, 19:14, 21:26, 10:9']
+        return [delta, profit]
 
-            'home':
-                'team': 'Miami Heat'
-              - 'tid': ????
-                'ftot':
-                    'result': [False, -17, 191, 87]
-                    'delta': [-1, -5.5, -9.5, -7.5]
-                    'profit': [23, 95, -100, 85]
-                'frst':
-                    'result': [False, -17, 191, 87]
-                    'delta': [-1, -5.5, -9.5, -7.5]
-                    'profit': [23, 95, -100, 85]
-            'away':
-                ....
+    def count_total(self, score, total):
+        """ Считатет дельту тотала & профит """
+        delta = self['home']['ftot']['resalt'][2] - total['value'][0]
 
-            'odds':
-                'ftot':
-                    line: 'mean': [1.83, 1.96], 'close': [1.85, 1.95],
-                          'open': [1.82, 1.97]
-                    hand: 'value': [-1.5, 1.5], 'mean': [2.59, 1.51],
-                          'open': [2.56, 1.52], 'close': [2.62, 1.5]
-                    tots: 'mean': [1.79, 2.02], 'value': [10.5, 10.5],
-                          'open': [1.84, 1.97], 'close': [1.75, 2.08]
-                'frst':
-                    line: 'mean': [1.9, 1.92], 'close': [1.9, 1.93],
-                          'open': [1.91, 1.92]
-                    hand: 'mean': [2.19, 1.71], 'value': [-0.5, 0.5],
-                          'open': [2.21, 1.7], 'close': [2.17, 1.72]
-                    totl: 'mean': [1.89, 1.92], 'value': [6.0, 6.0],
-                          'open': [1.93, 1.87], 'close': [1.84, 1.97]
-    """
-    try:
-        mdata['count_itot'] = count_itot(mdata['hcap'], mdata['totl'])
-        dt = {
-            'date': mdata['date'],
-            'time': mdata['time'],
-            'datetime': mdata['datetime'],
-            'timestamp': mdata['timestamp'],
-            'scraptime': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+        # подсчет прибыли
+        if delta > 0:
+            profit = int((total['mean'][0] - 1) * 100)
+        else:
+            profit = [-100, -100]
 
-        score = {
-            'score': mdata['score'],
-            'ot': mdata['ot'],
-            'res_box': mdata['res_box']}
+        return [[delta, delta], [profit, profit]]
 
-        st = stat_line(mdata['score'], mdata['line'])
-        hc = count_handy(mdata['score'], mdata['hcap'][1])
-        tl = (mdata['score'][0] + mdata['score'][1]) - mdata['totl'][1][0]
-        it = (mdata['score'][0] - mdata['count_itot'][0],
-              mdata['score'][1] - mdata['count_itot'][1])
+    def count_i_tot(self, score, itot):
+        """ Считатет инд. тотал & профит """
+        delta = [self['home']['ftot']['resalt'][3] - itot['value'][0],
+                 self['away']['ftot']['resalt'][3] - itot['value'][1]]
 
-        home = {
-            'result': count_totl('home', mdata['score']),
-            'delta': (st[0], hc[0], tl, it[0]),
-            'profit': (
-                int(mdata['line'][0] * 100 - 100) if st[0] > 0 else 0,
-                int(mdata['hcap'][2][0] * 100 - 100) if hc[0] > 0 else 0,
-                int(mdata['totl'][2][0] * 100 - 100) if tl > 0 else 0,
-                91 if it[0] > 0 else 0)}
+        profit = [int((itot['mean'][0] - 1) * 100) if delta[0] > 0 else -100,
+                  int((itot['mean'][1] - 1) * 100) if delta[1] > 0 else -100]
 
-        # home['full'], home['short'] = get_teams(mdata['teams'][0])
-
-        away = {
-            'result': count_totl('away', mdata['score']),
-            'delta': (st[1], hc[1], tl, it[1]),
-            'profit': (
-                int(mdata['line'][1] * 100 - 100) if st[1] > 0 else 0,
-                int(mdata['hcap'][2][1] * 100 - 100) if hc[1] > 0 else 0,
-                int(mdata['totl'][2][0] * 100 - 100) if tl > 0 else 0,
-                91 if it[1] > 0 else 0)}
-
-        # away['full'], away['short'] = get_teams(mdata['teams'][1])
-
-        #  count nba link & betexplorer
-        links = {
-            'oddsportal': 'http://www.oddsportal.com/' + mdata['link'],
-            'nba': '',
-            'betxplorer': ''}
-
-        odds = {
-            'line': mdata['line'],
-            'handy': (
-                (mdata['hcap'][1][0], mdata['hcap'][2][0]),
-                (mdata['hcap'][1][1], mdata['hcap'][2][1])),
-            'total': (
-                mdata['totl'][1][0], mdata['totl'][2][1], mdata['totl'][2][1]),
-            'indy': (
-                (mdata['count_itot'][0], 1.91, 1.91),
-                (mdata['count_itot'][1], 1.91, 1.91))}
-
-        new_match = dict(
-            sport='basketball',
-            league='NBA',
-            season=mdata['season'],
-            type=mdata['type'],
-            xeid=mdata['xeid'],
-            datetime=dt,
-            home=home,
-            away=away,
-            odds=odds,
-            score=score,
-            links=links)
-
-        return new_match
-
-    except Exception:
-        log_db.exception('Builder function err')
+        return [delta, profit]
 
 if __name__ == '__main__':
-    match_data = {
-        'season': '2014/2015',
-        'ot': False,
-        'hash': 'yj1b4',
-        'xeid': '67Upolsm',
-        'type': 'play-offs',
-        'score': [104, 87],
-        'link': '/basketball/usa/nba-2013-2014/san-antonio-spurs-miami-heat-67Upolsm/',
-        'teams': ['San Antonio Spurs', 'Miami Heat'],
-        'res_box': '22:29, 25:11, 30:18, 27:29',
-        'date': '11-06-14',
-        'timestamp': 1402448400,
-        'time': '04:00',
-        'datetime': '11 Jun 2014 04:00',
-        'line': (1.28, 3.65),
-        'hcap': (48, (-11.5, 11.5), (1.92, 1.89), 0.03),
-        'totl': (38, (200.5, 200.5), (1.9, 1.91), 0.01)}
-
-    # print(builder(match_data))
-    print(count_handy([112, 98], [-6.5, 6.5]))
+    base = {
+        'teams': ['Toronto Blue Jays', 'Boston Red Sox'],
+        'link': '/baseball/usa/mlb/toronto-blue-jays-boston-red-sox-4G79dfXC/',
+        'xhash': 'yj17d',
+        'xeid': '4G79dfXC',
+        'meta': {
+            'season': '2015',
+            'seas_type': 'season',
+            'sport': 'baseball',
+            'country': 'usa',
+            'league': 'mlb'},
+        'date': {
+            'timestamp': 1435770420,
+            'date': '01 Jul 2015',
+            'datetime': '01-07-15 20:07',
+            'time': '20:07'},
+        'score': {
+            'full': '11:2',
+            'ot': False,
+            'quat': '5:0, 2:0, 1:0, 0:0, 0:0, 1:0, 0:1, 2:1, X:0',
+            'main': ''},
+        'odds': {
+            'itot': {
+                'ftot': {
+                    'mean': [1.89, 1.89],
+                    'value': [4.5, 3.5]}},
+            'totl': {
+                'ftot': {
+                    'value': [8.5, 8.5], 'mean': [1.86, 1.94],
+                    'open': [1.83, 1.98], 'close': [1.9, 1.9]},
+                'frst': {
+                    'value': [4.5, 4.5], 'mean': [1.88, 1.92],
+                    'open': [1.87, 1.93], 'close': [1.88, 1.92]}
+            },
+            'line': {
+                'ftot': {
+                    'open': [1.67, 2.2],
+                    'close': [1.68, 2.18],
+                    'mean': [1.67, 2.19]},
+                'frst': {
+                    'open': [1.66, 2.27],
+                    'close': [1.68, 2.23],
+                    'mean': [1.67, 2.25]}
+            },
+            'hand': {
+                'ftot': {
+                    'value': [-1.5, 1.5], 'mean': [2.37, 1.6],
+                    'open': [2.34, 1.61], 'close': [2.39, 1.59]},
+                'frst': {
+                    'value': [-0.5, 0.5], 'mean': [1.92, 1.85],
+                    'open': [1.92, 1.89], 'close': [1.92, 1.82]}
+            }
+        }
+    }
+    m = Match(base)
+    print(m)

@@ -56,7 +56,7 @@ mhsh_dict = {
 """
 Посылает массив из годов, зачем ?
 """
-args = docopt(__doc__, version='0.4.146')
+args = docopt(__doc__, version='0.4.151')
 season, mhsh = args['<seas>'], args['<mhsh>']
 module = mhsh_dict[mhsh]
 

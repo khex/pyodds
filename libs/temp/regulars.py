@@ -6,6 +6,19 @@ basknorm = 'Final result 128:115 (45:22, 24:37, 30:25, 9:31)'
 baseover = 'Final result 4:3 (0:1, 0:0, 0:0, 0:0, 0:0, 2:0, 0:0, 0:0, 0:1, 2:1)'
 basenorm = 'Final result 2:4 (0:0, 0:0, 0:0, 0:3, 0:0, 0:0, 1:1, 0:0, 1:0)'
 
+"""
+bask = "Final result 90:100 OT (83:83) (19:21, 19:23, 22:10, 23:29, 7:17)"
+base = "Final result 5:3 (0:0, 0:0, 0:0, 0:0, 0:0, 0:0, 1:1, 4:0, X:2)"
+
+bask_full = re.findall('\s+(\d+:\d+)\s+', bask)[0]
+bask_main = re.findall('\(([\d+:\d+,*\s*]+)\)', bask)
+
+base_full = re.findall('\s+(\d+:\d+)\s+', bask)[0]
+base_main = re.findall('\(([X:\d+,*\s*]+)\)', bask)
+
+print(base_full, base_main)
+"""
+
 
 def quaters(text, sport):
     """ la-la-la """
