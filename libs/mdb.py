@@ -12,33 +12,50 @@ from pymongo import MongoClient
 # from logger import log_db
 
 
-class MongoDB(object):
-    """docstring for ClassName"""
-    def __init__(self, db_name):
-        try:
-            self.__client = MongoClient('mongodb://localhost:27017/')
-            self.__db = self.__client[db_name]
-            self.__db.collection_names()
-            self.__teams = self.__db['teams']
-            self.__matches = self.__db['matches']
-            self.__modules = self.__db['modules']
-        except Exception as ex:
-            print('-= MongoDB ne dostupna=-\n{}'.format(ex))
+client = MongoClient('mongodb://localhost:27017/')
+db = client['delta_test']
+# db.collection_names()
+# print(dir(db)) проверить доступность каким-то методом
 
-    """ Team methods """
-    def team_save(self, teams):
+
+class Teams(object):
+    """docstring for ClassName"""
+
+    def __init__(self):
+        self.__teams = db['teams']
+
+    def save_one(self, team):
+        return self.__teams.insert_one(team).inserted_id
+
+    def save_many(self, teams):
         return self.__teams.insert_many(teams).inserted_ids
 
-    def team_find(self, full):
-        return self.__teams.find_one({'full': full})
+    def find_one(self, full_name):
+        return self.__teams.find_one({'full': full_name})
 
-    """ Match methods """
-    def match_get_xeid(self, xeid):
-        return False  # True
 
-    """ Module methods """
-    def module_save_n_back(self, mdl):
+class Matches(object):
+    """docstring for ClassName"""
+    def __init__(self):
+        self.__matches = db['matches']
+
+    def save_one(self, match):
+        return self.__matches.insert_one(match).inserted_id
+
+    def find_xeid(self, xeid):
+        return self.__matches.find_one({'xeid': xeid})
+
+
+class Modules(object):
+    """docstring for ClassName"""
+    def __init__(self):
+        self.__modules = db['modules']
+
+    def save_one(self, mdl):
         m_id = self.__modules.insert_one(mdl).inserted_id
-        return self.__modules.find_one({'_id': m_id})
+        # return self.__modules.find_one({'_id': m_id})
+        return m_id
 
-monga = MongoDB('delta_test')
+teams = Teams()
+matches = Matches()
+modules = Modules()

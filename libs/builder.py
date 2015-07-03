@@ -112,9 +112,11 @@ class Match(UserDict):
         self['xeid'] = dd['xeid']
         self['date'] = dd['date']
         self['score'] = dd['score']
+        self['odds'] = dd['odds']  # может в каждую команду отдельно???
 
         self['date']['scraptime'] = datetime.now().strftime("%Y-%m-%d %H:%M")
         self['home']['team'], self['away']['team'] = dd['teams']
+        self['home']['tid'], self['away']['tid'] = dd['tids']
 
         # counting Full Time & Over Time
         once_scrd = self.count_result(dd['score']['full'])
@@ -230,7 +232,7 @@ class Match(UserDict):
         if delta > 0:
             profit = int((total['mean'][0] - 1) * 100)
         else:
-            profit = [-100, -100]
+            profit = -100
 
         return [[delta, delta], [profit, profit]]
 

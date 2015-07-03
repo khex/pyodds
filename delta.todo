@@ -2,10 +2,6 @@ modules
  ☐ скопировать в каталог 'pyodd'
 
 libs/mdb.py
- ☐ ПОЛНАЯ ХЕРНЯ МЕЖДУ МОЛДУЛЯМИ И mdb.py
- ☐ дописать match_get_xeid
- ☐ create "teams" CR
- ☐ разбить на классы
 
 libs/tabler.py
  ☐ 'rows_to_dict' -> неоконченый матч
@@ -15,10 +11,7 @@ libs/odds.py
  ☐ написать 'one_x_two()'
  ☐ написать 'odds_even()'
  ☐ переписать все log сообщения
- ☐ переписать Builder в класс
 
 temp/class_Match.py
   ☐ дописать 'count_i_tot'
-  ☐ как и где прикрутить коэфициенты?
   ☐ где 'ftot', а где 'one_x_two'
-  ☐ где добавить 'tid'?

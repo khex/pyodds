@@ -50,9 +50,3 @@ teams = [
     dict(tid=29, opid="hGuCX5Su", full="Utah Jazz", short="utah-jazz", seasons=year),
     dict(tid=30, opid="W6vGWPsn", full="Washington Wizards", short="washington-wizards", seasons=year)
 ]
-
-m_data = module.save_n_back(m_data)
-for t in teams:
-    t['module'] = m_data
-
-team.save(teams)

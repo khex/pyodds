@@ -6,7 +6,7 @@ import json
 import requests
 import datetime
 from bs4 import BeautifulSoup
-from mdb import monga
+from mdb import teams, matches
 from odds import get_odds
 from builder import Match
 from logger import log_tabler
@@ -138,7 +138,7 @@ def get_table(meta, diapz):
 
                     # проверить наличие матча в базе
                     # 2015-06-23 20:57:16,971 INFO tabler 40wRuQtg match in Base
-                    if monga.match_get_xeid(match['xeid']):
+                    if matches.find_xeid(match['xeid']):
                         log_tabler.info('{} match in Base'.format(match['xeid']))
                         # Оператор continue начинает следующий проход цикла,
                         # минуя оставшееся тело цикла (for или while)
@@ -151,14 +151,14 @@ def get_table(meta, diapz):
                         continue
 
                     match.update(decoded)
-
                     xhash_score = get_xhash_score(match['link'], meta['sport'])
                     match.update(xhash_score)
 
                     match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'])
 
                     m = Match(match)
-                    print(m)
+                    resp = matches.save_one(m)
+                    print(resp)
 
             return('Well done.')
 
@@ -207,14 +207,21 @@ def rows_to_dict(t_data):
         #     <span class="bold">Capo d'Orlando</span> - Milano
         # </a>
         resp_dict['teams'] = str(t_data[1].find('a').text.replace("\\'", "'")).split(' - ')
-        """
+
         # проверить наличие команды в БД и выкинуть ошипку
-        home, away = resp_dict['teams']
-        if not monga.team_find(home):
-            raise Exception('Team \'{}\' not in DB'.format(home))
-        if not monga.team_find(away):
-            raise Exception('Team \'{}\' not in DB'.format(away))
-        """
+        resp_dict['tids'] = [0, 0]
+        home = teams.find_one(resp_dict['teams'][0])
+        away = teams.find_one(resp_dict['teams'][1])
+
+        if home:
+            resp_dict['tids'][0] = home['tid']
+        else:
+            raise Exception('Team \'{}\' not in DB'.format(resp_dict['teams'][0]))
+
+        if away:
+            resp_dict['tids'][1] = away['tid']
+        else:
+            raise Exception('Team \'{}\' not in DB'.format(resp_dict['teams'][1]))
 
     except Exception:
         log_tabler.exception('bs4.tag => teams\n')
@@ -312,10 +319,8 @@ def get_xhash_score(arg_url, sport):
 
 if __name__ == '__main__':
 
-    # http://www.oddsportal.com/baseball/usa/nba/results/#/page/1/
-    # http://www.oddsportal.com/baseball/usa/mlb/results/#/page/1/
     modl_list = dict(sport='baseball', country='usa',
                      league='mlb', season='2015')
-    diapazon = range(1, 2)
+    diapazon = range(1, 50)
     resp = get_table(modl_list, diapazon)
     print(resp)
