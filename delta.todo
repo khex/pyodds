@@ -4,8 +4,6 @@ modules
 libs/mdb.py
 
 libs/tabler.py
- ☐ 'rows_to_dict' -> неоконченый матч
- ☐ переписать все log сообщения
 
 libs/odds.py
  ☐ написать 'one_x_two()'

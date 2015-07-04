@@ -38,30 +38,7 @@ def get_table(meta, diapz):
             diapz @ range: range(1, 50)
 
         Return: list of {
-            'teams': ['Venezia', 'Sassari'],
-            'link': '/basketball/italy/lega-a/venezia-sassari-tGwcHwNl/',
-            'xeid': 'tGwcHwNl',
-            'xhash': 'yjc0b',
-
-            'meta': {
-                'season': '2014-2015',
-                'league': 'lega-a',
-                'country': 'italy',
-                'sport': 'basketball',
-                'seas_type': 'season'},
-
-            'score': {
-                'quat': ['19:21, 19:23, 22:10, 23:29, 7:17'],
-                'full': '90:100',
-                'main': '83:83',
-                'ot': True},
-
-            'date': {
-                'timestamp': 1420399800,
-                'date': '04-01-15',
-                'datetime': '04 Jan 2015 21:30',
-                'time': '21:30'}
-            }
+            'Page done!''
     """
     # usa/nba/results/#/page/2/ || usa/nba-2013-2014/results/#/page/2/
     domen = 'http://www.oddsportal.com'
@@ -146,8 +123,8 @@ def get_table(meta, diapz):
 
                     decoded = rows_to_dict(tag.contents)
                     # проверить окончен ли матч
-                    if decoded == 'unfished':
-                        log_tabler.warn('{} match not fished'.format(match['xeid']))
+                    if type(decoded) is str:
+                        log_tabler.info(decoded)
                         continue
 
                     match.update(decoded)
@@ -160,16 +137,21 @@ def get_table(meta, diapz):
                     resp = matches.save_one(m)
                     print(resp)
 
-            return('Well done.')
+            print('Page done.')
+    return('Well Done')
 
 
 def rows_to_dict(t_data):
-    """ Парсит рядки из таблицы результатов
-        с 'bs4_html_tag' в словарь
+    """ Парсит рядки из таблицы результатов из 'bs4_html_tag' в словарь
 
         Arguments:
-            t_data => bs4 html tag
-
+            t_data @ list of bs4 html tags: [
+                <td class="table-time datet t1435975800-1-1-0-0 "/>,
+                <td class="name table-participant" colspan="2">...</a></td>,
+                <td class="center bold table-odds table-score">1:2</td>,
+                <td class="odds-nowrp" ... xoid="E-221vlx2rrhkx0x48ku5">-</td>,
+                <td class="result-ok ..." xoid="E-221vlx2rrhkx0x48ku6">-</td>,
+                <td class="center info-value">14</td>]
         Return: {
             'link': '/basketball/usa/ ... -miami-heat-67Upolsm/',
             'teams': ['San Antonio Spurs', 'Miami Heat'],
@@ -177,16 +159,24 @@ def rows_to_dict(t_data):
                 'date': '11-06-14',
                 'timestamp': 1402448400,
                 'time': '04:00',
-                'datetime': '11 Jun 2014 04:00'}
-            }
+                'datetime': '11 Jun 2014 04:00'}}
     """
-    resp_dict = dict(date={}, link='', teams=[])
-    """   get date & time   """
     try:
+        resp_dict = dict(date={}, link='', teams=[])
+
+        """ get match link """
+        resp_dict['link'] = str(t_data[1].find('a').get('href'))
+
+        """ partials/match_types.html
+            Матч окончился 'счет:счет' либо отменен:
+            - 'ret.'
+            - 'postr.'
         """
-        ЭСЛИ МАТЧ НЕ ОКОНЧЕН ИЛИ ОТМЕНЕН
-        return 'unfished'
-        """
+        result = t_data[2].text
+        if ':' not in result:
+            return '{} match was {}'.format(resp_dict['link'], result)
+
+        """   get date & time   """
         #  table-time datet t1397689200-1-1-0-0
         date = resp_dict['date']
         data = int(t_data[0].get('class').split(' ')[2].split('-')[0][1:])
@@ -196,13 +186,8 @@ def rows_to_dict(t_data):
         date['date'] = temp.strftime('%d %b %Y')
         date['time'] = temp.strftime('%H:%M')
         date['datetime'] = temp.strftime('%d-%m-%y %H:%M')
-        # date['datetime'] = temp.strftime('%d %b %Y %H:%M')
 
-    except Exception:
-        log_tabler.exception('bs4.tag => date & time\n')
-
-    """   get teams   """
-    try:
+        """ get teams """
         # <a href="/basketball/italy/lega-a/capo-dorlando-milano-dzzJsnCt/">
         #     <span class="bold">Capo d'Orlando</span> - Milano
         # </a>
@@ -223,16 +208,10 @@ def rows_to_dict(t_data):
         else:
             raise Exception('Team \'{}\' not in DB'.format(resp_dict['teams'][1]))
 
-    except Exception:
-        log_tabler.exception('bs4.tag => teams\n')
+        return resp_dict
 
-    """   get match link """
-    try:
-        resp_dict['link'] = str(t_data[1].find('a').get('href'))
     except Exception:
-        log_tabler.exception('bs4.tag => link\n')
-
-    return resp_dict
+        log_tabler.exception('func rows_to_dict()')
 
 
 def get_xhash_score(arg_url, sport):
@@ -242,80 +221,72 @@ def get_xhash_score(arg_url, sport):
         Arguments:
             match_url '/basketball/usa/ ... -miami-heat-67Upolsm/'
             score: 'basketball'
+
         Return: {
             'score': {
                 'main': '67:67',
                 'ot': True,
                 'quat': ['11:18, 19:12, 18:21, 19:16, 9:8'],
                 'full': '76:75'},
-            'xhash': 'yj84d'
-        }
+            'xhash': 'yj84d'}
     """
-    resp_dict = dict(score={})
     try:
+        resp_dict = dict(score={})
+
         # partilas\match_page.html 1417
         p = requests.get('http://www.oddsportal.com' + arg_url)
         p.encoding = 'ISO-8859-1'
         raw_text = str(p.content)
 
         """ xhash, xhashf <- нужен ли? """
-        try:
-            # возмодно нужно в JSON как в tabler ?
-            frst = raw_text.find('xhash') + 8
-            last = raw_text.find('xhashf') - 3
-            # first hash temp var
-            fhash = ''.join(raw_text[frst:last].split('%')[1:])
-            xhash = bytes.fromhex(fhash).decode('utf-8')
+        # возмодно нужно в JSON как в tabler ?
+        frst = raw_text.find('xhash') + 8
+        last = raw_text.find('xhashf') - 3
+        # first hash temp var
+        fhash = ''.join(raw_text[frst:last].split('%')[1:])
+        xhash = bytes.fromhex(fhash).decode('utf-8')
 
-            resp_dict['xhash'] = xhash
-
-        except Exception:
-            log_tabler.exception('page => xhash')
+        resp_dict['xhash'] = xhash
 
         """ score 'partials/match_score.html'  """
-        try:
-            soup = BeautifulSoup(p.content)
-            html = soup.find(id='event-status')
-            text = html.text.replace(u'\xa0', u' ')
+        soup = BeautifulSoup(p.content)
+        html = soup.find(id='event-status')
+        text = html.text.replace(u'\xa0', u' ')
 
-            #  <p class="result">
-            mtch_rslt = html.find('p').get('class')[0]
-            score = resp_dict['score']
-            if sport == 'basketball':
-                if re.search('OT', text):
-                    score['ot'] = True
-                    score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
-                    # ['115:115', '27:25, 17:25, 21:25, 30:20, 13:0']
-                    re_find = re.findall('\(([\d+:\d+,*\s*]+)\)', text)
-                    score['main'] = re_find[0]  # '115:115'
-                    # '27:25, 17:25, 21:25, 30:20, 13:0'
-                    score['quat'] = re_find[1]
-                else:
-                    score['ot'] = False
-                    score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
-                    score['quat'] = re.findall('\((.+)\)', text)
-
-            elif sport == 'baseball':
-                # "Final result 1:2 (0:0, 0:0, 0:1, 1:0, 0:0, 0:0, 0:0, 0:0, 0:0, 0:1)"
-                # "Final result 5:3 (0:0, 0:0, 0:0, 0:0, 0:0, 0:0, 1:1, 4:0, X:2)"
-                score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]  # '1:2'
-                score['quat'] = re.findall('\(([X:\d+,*\s*]+)\)', text)[0]
-                score['ot'] = False if len(score['quat'].split(', ')) == 9 else True
-
-            # <p class="result-alert"><span class="bold">postponed</span></p>
-            elif mtch_rslt == 'result-alert':
-                log_tabler.info('Result Alert (match was canseled)')
+        #  <p class="result">
+        mtch_rslt = html.find('p').get('class')[0]
+        score = resp_dict['score']
+        if sport == 'basketball':
+            if re.search('OT', text):
+                score['ot'] = True
+                score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
+                # ['115:115', '27:25, 17:25, 21:25, 30:20, 13:0']
+                re_find = re.findall('\(([\d+:\d+,*\s*]+)\)', text)
+                score['main'] = re_find[0]  # '115:115'
+                # '27:25, 17:25, 21:25, 30:20, 13:0'
+                score['quat'] = re_find[1]
             else:
-                raise BaseException('Smth with Score scrapper')
+                score['ot'] = False
+                score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]
+                score['quat'] = re.findall('\((.+)\)', text)
 
-        except Exception:
-            print('\n{}\n'.format(text))
-            log_tabler.exception('page => score')
+        elif sport == 'baseball':
+            # "Final result 1:2 (0:0, 0:0, 0:1, 1:0, 0:0, 0:0, 0:0, 0:0, 0:0, 0:1)"
+            # "Final result 5:3 (0:0, 0:0, 0:0, 0:0, 0:0, 0:0, 1:1, 4:0, X:2)"
+            score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]  # '1:2'
+            score['quat'] = re.findall('\(([X:\d+,*\s*]+)\)', text)[0]
+            score['ot'] = False if len(score['quat'].split(', ')) == 9 else True
+
+        # <p class="result-alert"><span class="bold">postponed</span></p>
+        elif mtch_rslt == 'result-alert':
+            log_tabler.info('Result Alert (match was canseled)')
+        else:
+            raise BaseException('Smth with Score scrapper')
 
         return resp_dict
 
     except Exception:
-        log_tabler('Smth wrong with rows_func')
+        log_tabler('Func get_xhash_score()')
 
 if __name__ == '__main__':
 
