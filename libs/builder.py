@@ -103,7 +103,6 @@ class Match(UserDict):
                         'open': [1.88, 1.85],
                         'value': [82.5, 82.5]}}}
         """
-
         self.data = {'home': {'ftot': {}, 'frst': {}},
                      'away': {'ftot': {}, 'frst': {}}}
 
@@ -114,7 +113,7 @@ class Match(UserDict):
         self['score'] = dd['score']
         self['odds'] = dd['odds']  # может в каждую команду отдельно???
 
-        self['date']['scraptime'] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        self['date']['scraptime'] = datetime.now().strftime("%d-%m-%y %H:%M")
         self['home']['team'], self['away']['team'] = dd['teams']
         self['home']['tid'], self['away']['tid'] = dd['tids']
 
@@ -126,7 +125,9 @@ class Match(UserDict):
         scor = [int(s) for s in dd['score']['full'].split(':')]
         line = self.count_line(scor, dd['odds']['line']['ftot'])
         hand = self.count_handy(scor, dd['odds']['hand']['ftot'])
+        # error
         totl = self.count_total(scor, dd['odds']['totl']['ftot'])
+        # error
         itot = self.count_i_tot(scor, dd['odds']['itot']['ftot'])
 
         # делает срезы из массивов 1й дельта, а 2й прибыль
@@ -226,6 +227,9 @@ class Match(UserDict):
 
     def count_total(self, score, total):
         """ Считатет дельту тотала & профит """
+        if total['value'] == [0, 0]:
+            return [[0, 0], [0, 0]]
+
         delta = self['home']['ftot']['resalt'][2] - total['value'][0]
 
         # подсчет прибыли
@@ -238,6 +242,9 @@ class Match(UserDict):
 
     def count_i_tot(self, score, itot):
         """ Считатет инд. тотал & профит """
+        if itot['value'] == [0, 0]:
+            return [[0, 0], [0, 0]]
+
         delta = [self['home']['ftot']['resalt'][3] - itot['value'][0],
                  self['away']['ftot']['resalt'][3] - itot['value'][1]]
 

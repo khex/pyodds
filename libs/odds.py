@@ -48,6 +48,7 @@ def get_page(pref, xeid, xhash, value):
         ['d']['oddsdata']['back']- массив кф. на мамент начала собития
         ['d']['history']['back'] - массив кф. с начала прийома ставок
         """
+
         return {
             'close': params['d']['oddsdata']['back'],
             'history': params['d']['history']['back']}
@@ -146,23 +147,34 @@ def home_away(pref, xeid, xhash, args_dict):
     try:
         resp_dict = {}
         for period, value in args_dict.items():
-            # period: 'ftot', value: '3-1'
+            # period: 'ftot', value: '3-1',
+            # period: '1st Half', value: '3-3'
             resp_dict[period] = {}
 
+            # get JSON resalts
             odds_dict = get_page(pref, xeid, xhash, value)
             mtch_type = 'E-{}-0-0-0'.format(value)
 
-            tids = odds_dict['close'][mtch_type]['OutcomeID']
-            tids = tids if type(tids) is list else [tids['0'], tids['1']]
+            # season = "OutcomeID":["221hix2rrhkx0x48k1v","221hix2rrhkx0x48k20"]
+            # 'pre-season' = {'close': None, 'history': None}
+            if odds_dict['close']:
+                tids = odds_dict['close'][mtch_type]['OutcomeID']
+                tids = tids if type(tids) is list else [tids['0'], tids['1']]
 
-            close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
-            open_odds = map_open(odds_dict['history'], tids)
+                # ???
+                close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
+                open_odds = map_open(odds_dict['history'], tids)
 
-            resp_dict[period]['close'] = close_odds
-            resp_dict[period]['open'] = open_odds
-            resp_dict[period]['mean'] = [
-                round(mean([close_odds[0], open_odds[0]]), 2),
-                round(mean([close_odds[1], open_odds[1]]), 2)]
+                resp_dict[period]['close'] = close_odds
+                resp_dict[period]['open'] = open_odds
+                resp_dict[period]['mean'] = [
+                    round(mean([close_odds[0], open_odds[0]]), 2),
+                    round(mean([close_odds[1], open_odds[1]]), 2)]
+
+            else:
+                resp_dict[period]['close'] = [0, 0]
+                resp_dict[period]['open'] = [0, 0]
+                resp_dict[period]['mean'] = [0, 0]
 
         return resp_dict
 
@@ -201,25 +213,32 @@ def asian_handy(pref, xeid, xhash, args_dict):
 
             odds_dict = get_page(pref, xeid, xhash, value)
 
-            for key, value in odds_dict['close'].items():
-                temp_odds = len(value['odds'].items())
-                if temp_odds > max_odds:
-                    max_odds = temp_odds
-                    mtch_type = key
-                    tids = value['OutcomeID']
-                    handy_value = float(value['handicapValue'])
+            if odds_dict['close']:
+                for key, value in odds_dict['close'].items():
+                    temp_odds = len(value['odds'].items())
+                    if temp_odds > max_odds:
+                        max_odds = temp_odds
+                        mtch_type = key
+                        tids = value['OutcomeID']
+                        handy_value = float(value['handicapValue'])
 
-            resp_dict[period]['value'] = [handy_value, -1 * handy_value]
-            close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
+                resp_dict[period]['value'] = [handy_value, -1 * handy_value]
+                close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
 
-            tids = tids if type(tids) is list else [tids['0'], tids['1']]
-            open_odds = map_open(odds_dict['history'], tids)
+                tids = tids if type(tids) is list else [tids['0'], tids['1']]
+                open_odds = map_open(odds_dict['history'], tids)
 
-            resp_dict[period]['close'] = close_odds
-            resp_dict[period]['open'] = open_odds
-            resp_dict[period]['mean'] = [
-                round(mean([close_odds[0], open_odds[0]]), 2),
-                round(mean([close_odds[1], open_odds[1]]), 2)]
+                resp_dict[period]['close'] = close_odds
+                resp_dict[period]['open'] = open_odds
+                resp_dict[period]['mean'] = [
+                    round(mean([close_odds[0], open_odds[0]]), 2),
+                    round(mean([close_odds[1], open_odds[1]]), 2)]
+
+            else:
+                resp_dict[period]['value'] = [0, 0]
+                resp_dict[period]['close'] = [0, 0]
+                resp_dict[period]['open'] = [0, 0]
+                resp_dict[period]['mean'] = [0, 0]
 
         return resp_dict
 
@@ -258,25 +277,32 @@ def over_under(pref, xeid, xhash, args_dict):
 
             odds_dict = get_page(pref, xeid, xhash, value)
 
-            for key, value in odds_dict['close'].items():
-                temp_odds = len(value['odds'].items())
-                if temp_odds > max_odds:
-                    max_odds = temp_odds
-                    mtch_type = key
-                    tids = value['OutcomeID']
-                    handy_value = float(value['handicapValue'])
+            if odds_dict['close']:
+                for key, value in odds_dict['close'].items():
+                    temp_odds = len(value['odds'].items())
+                    if temp_odds > max_odds:
+                        max_odds = temp_odds
+                        mtch_type = key
+                        tids = value['OutcomeID']
+                        handy_value = float(value['handicapValue'])
 
-            resp_dict[period]['value'] = [handy_value, handy_value]
-            close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
+                resp_dict[period]['value'] = [handy_value, handy_value]
+                close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
 
-            tids = tids if type(tids) is list else [tids['0'], tids['1']]
-            open_odds = map_open(odds_dict['history'], tids)
+                tids = tids if type(tids) is list else [tids['0'], tids['1']]
+                open_odds = map_open(odds_dict['history'], tids)
 
-            resp_dict[period]['close'] = close_odds
-            resp_dict[period]['open'] = open_odds
-            resp_dict[period]['mean'] = [
-                round(mean([close_odds[0], open_odds[0]]), 2),
-                round(mean([close_odds[1], open_odds[1]]), 2)]
+                resp_dict[period]['close'] = close_odds
+                resp_dict[period]['open'] = open_odds
+                resp_dict[period]['mean'] = [
+                    round(mean([close_odds[0], open_odds[0]]), 2),
+                    round(mean([close_odds[1], open_odds[1]]), 2)]
+
+            else:
+                resp_dict[period]['value'] = [0, 0]
+                resp_dict[period]['close'] = [0, 0]
+                resp_dict[period]['open'] = [0, 0]
+                resp_dict[period]['mean'] = [0, 0]
 
         return resp_dict
 
@@ -329,17 +355,33 @@ def get_odds(sport, xeid, xhash):
             'hand': pool.apply(asian_handy, args=('1-6', xeid, xhash, dict(ftot='5-1', frst='5-3'))),
             'totl': pool.apply(over_under, args=('1-6', xeid, xhash, dict(ftot='2-1', frst='2-3')))}
         pool.close()
-        itot = {'ftot': {
+        """ { для 'pre-seas' нет Тотал значения
+        'hand': {
+            'frst': {},
+            'ftot': {'mean': [2.25, 1.65], 'value': [-1.5, 1.5],
+                     'close': [2.25, 1.65], 'open': [2.25, 1.65]}},
+        'line': {
+            'frst': {},
+            'ftot': {'open': [1.71, 2.11], 'close': [1.7, 2.12], 'mean': [1.71, 2.12]}},
+        'totl': {
+            'ftot': {},
+            'frst': {}}
+        }
+        """
+        # считать только когда присутств Линия и Тотал
+        if resp['line']['ftot']['mean'] != [0, 0] and resp['totl']['ftot']['value'] != [0, 0]:
+            resp['itot'] = dict(ftot={
                 'mean': [1.89, 1.89], 'open': [0, 0], 'close': [0, 0],
                 'value': [itot_base(resp['line']['ftot']['mean'][0], resp['totl']['ftot']['value'][0]),
-                          itot_base(resp['line']['ftot']['mean'][1], resp['totl']['ftot']['value'][1])]}}
-        resp['itot'] = itot
+                          itot_base(resp['line']['ftot']['mean'][1], resp['totl']['ftot']['value'][1])]})
+        else:
+            resp['itot'] = dict(ftot={
+                'value': [0, 0], 'mean': [0, 0], 'open': [0, 0], 'close': [0, 0]})
 
     elif sport == 'basketball':
         pass
 
     return resp
-
 
 if __name__ == '__main__':
     """ {

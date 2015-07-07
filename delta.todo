@@ -4,12 +4,19 @@ modules
 libs/mdb.py
 
 libs/tabler.py
+ ☐ 'date.timestamp' > 'date.unix'
+ ☐ уравнить вывод дат
 
 libs/odds.py
+ ☐ обновить описание аргум и возвр
  ☐ написать 'one_x_two()'
  ☐ написать 'odds_even()'
  ☐ переписать все log сообщения
 
-temp/class_Match.py
+libs/logger.py
+ ☐ не писать 'INFO' не 
+
+temp/builder.py.py
+  ☐ обновить описание аргум и возвр
   ☐ дописать 'count_i_tot'
   ☐ где 'ftot', а где 'one_x_two'

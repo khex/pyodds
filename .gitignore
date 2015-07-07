@@ -1,3 +1,4 @@
 *.pyc
 *.log
 lib/*.pyc
+getters/.ipynb_checkpoints

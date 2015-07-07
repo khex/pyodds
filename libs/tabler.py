@@ -169,8 +169,10 @@ def rows_to_dict(t_data):
 
         """ partials/match_types.html
             Матч окончился 'счет:счет' либо отменен:
-            - 'ret.'
-            - 'postr.'
+            - ret.   > Retired
+            - postr. > Postponed
+            - canc.  > Canceled
+            - abn.   > Abandoned
         """
         result = t_data[2].text
         if ':' not in result:
@@ -183,7 +185,7 @@ def rows_to_dict(t_data):
         date['timestamp'] = data
         # 2014-06-16 03:00:00
         temp = datetime.datetime.fromtimestamp(data)
-        date['date'] = temp.strftime('%d %b %Y')
+        date['date'] = temp.strftime('%d-%m-%y')
         date['time'] = temp.strftime('%H:%M')
         date['datetime'] = temp.strftime('%d-%m-%y %H:%M')
 
@@ -292,6 +294,6 @@ if __name__ == '__main__':
 
     modl_list = dict(sport='baseball', country='usa',
                      league='mlb', season='2015')
-    diapazon = range(1, 50)
+    diapazon = range(25, 50)
     resp = get_table(modl_list, diapazon)
     print(resp)
