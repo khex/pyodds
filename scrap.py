@@ -35,12 +35,8 @@ Options:
 """
 
 from docopt import docopt
-from libs.tabler import table, rows
+from libs.tabler import get_table
 from libs.logger import log_main
-from libs.db import get_xeid
-# from libs.db import save_to_db
-# from libs.odds import get_odds
-# from libs.builder import builder
 
 # пока мало модулей, то их не выгодно тянуть из базы,
 # разве что потом попробовать 'pickel'
@@ -96,7 +92,7 @@ if args['full'] is True:
             #######################
             else:
                 match = rows(bs4_tag)
-                """" УБРАТЬ ОТСБДА И ПОМЕСТИТЬ В TABLER.PY
+                """" УБРАТЬ ОТСЮДА И ПОМЕСТИТЬ В TABLER.PY
                 if match is not None:
                     match['season'] = season
                     match['type'] = seas_type

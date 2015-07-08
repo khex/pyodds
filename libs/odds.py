@@ -279,12 +279,15 @@ def over_under(pref, xeid, xhash, args_dict):
 
             if odds_dict['close']:
                 for key, value in odds_dict['close'].items():
+
                     temp_odds = len(value['odds'].items())
-                    if temp_odds > max_odds:
+                    temp_valu = float(value['handicapValue'])
+
+                    if temp_odds > max_odds and temp_valu % 1 != 0:
                         max_odds = temp_odds
                         mtch_type = key
                         tids = value['OutcomeID']
-                        handy_value = float(value['handicapValue'])
+                        handy_value = temp_valu
 
                 resp_dict[period]['value'] = [handy_value, handy_value]
                 close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
@@ -298,6 +301,11 @@ def over_under(pref, xeid, xhash, args_dict):
                     round(mean([close_odds[0], open_odds[0]]), 2),
                     round(mean([close_odds[1], open_odds[1]]), 2)]
 
+                print('value: {} mean: {} delta: {}, amount: {}'.format(resp_dict[period]['value'][0],
+                      resp_dict[period]['mean'],
+                      abs(round(resp_dict[period]['mean'][0] - resp_dict[period]['mean'][1], 2)),
+                      max_odds
+                      ))
             else:
                 resp_dict[period]['value'] = [0, 0]
                 resp_dict[period]['close'] = [0, 0]

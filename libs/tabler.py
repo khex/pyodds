@@ -135,7 +135,7 @@ def get_table(meta, diapz):
 
                     m = Match(match)
                     resp = matches.save_one(m)
-                    print(resp)
+                    print(resp, '\n')
 
             print('Page done.')
     return('Well Done')
@@ -166,7 +166,7 @@ def rows_to_dict(t_data):
 
         """ get match link """
         resp_dict['link'] = str(t_data[1].find('a').get('href'))
-
+        print(resp_dict['link'])
         """ partials/match_types.html
             Матч окончился 'счет:счет' либо отменен:
             - ret.   > Retired
@@ -182,12 +182,12 @@ def rows_to_dict(t_data):
         #  table-time datet t1397689200-1-1-0-0
         date = resp_dict['date']
         data = int(t_data[0].get('class').split(' ')[2].split('-')[0][1:])
-        date['timestamp'] = data
+        date['stamp'] = data
         # 2014-06-16 03:00:00
         temp = datetime.datetime.fromtimestamp(data)
-        date['date'] = temp.strftime('%d-%m-%y')
+        date['date'] = temp.strftime('%y-%m-%d')
         date['time'] = temp.strftime('%H:%M')
-        date['datetime'] = temp.strftime('%d-%m-%y %H:%M')
+        date['datetime'] = temp.strftime('%y-%m-%d %H:%M')
 
         """ get teams """
         # <a href="/basketball/italy/lega-a/capo-dorlando-milano-dzzJsnCt/">
@@ -294,6 +294,6 @@ if __name__ == '__main__':
 
     modl_list = dict(sport='baseball', country='usa',
                      league='mlb', season='2015')
-    diapazon = range(25, 50)
+    diapazon = range(1, 50)
     resp = get_table(modl_list, diapazon)
     print(resp)

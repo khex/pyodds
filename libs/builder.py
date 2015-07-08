@@ -113,7 +113,7 @@ class Match(UserDict):
         self['score'] = dd['score']
         self['odds'] = dd['odds']  # может в каждую команду отдельно???
 
-        self['date']['scraptime'] = datetime.now().strftime("%d-%m-%y %H:%M")
+        self['date']['scraptime'] = datetime.now().strftime('%y-%m-%d %H:%M')
         self['home']['team'], self['away']['team'] = dd['teams']
         self['home']['tid'], self['away']['tid'] = dd['tids']
 
@@ -125,9 +125,7 @@ class Match(UserDict):
         scor = [int(s) for s in dd['score']['full'].split(':')]
         line = self.count_line(scor, dd['odds']['line']['ftot'])
         hand = self.count_handy(scor, dd['odds']['hand']['ftot'])
-        # error
         totl = self.count_total(scor, dd['odds']['totl']['ftot'])
-        # error
         itot = self.count_i_tot(scor, dd['odds']['itot']['ftot'])
 
         # делает срезы из массивов 1й дельта, а 2й прибыль
