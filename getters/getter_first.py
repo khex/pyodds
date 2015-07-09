@@ -23,7 +23,7 @@ def grouper(arg):
     # return [len(a[1]) if a[0] is True else -len(a[1]) for a in arr]
 
 for t in teams:
-    line, hcap, totl, itot = [], [], [], []  # [] * 4
+    line, hcap, totl, itot = [], [], [], []
     print('\n', t)
     res = db.matches.find({'$or': [{'home.short': t}, {'away.short': t}]}).sort("datetime.timestamp", -1)
 
@@ -32,6 +32,7 @@ for t in teams:
             """   get delta   """
             delta = r["home"]["delta"] if r["home"]["full"] == teams[1] else r["away"]["delta"]
 
+            # набивает массивы по одному числу
             line.append(delta[0])
             hcap.append(delta[1])
             totl.append(delta[2])
