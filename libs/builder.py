@@ -127,9 +127,7 @@ class Match(UserDict):
         hand = self.count_handy(scor, dd['odds']['hand']['ftot'])
         totl = self.count_total(scor, dd['odds']['totl']['ftot'])
         itot = self.count_i_tot(scor, dd['odds']['itot']['ftot'])
-        print(line)
 
-        # делает срезы из массивов 1й дельта, а 2й прибыль
         self['home']['ftot']['delta'], self['away']['ftot']['delta'] = [
             [line[0][n], hand[0][n], totl[0][n], itot[0][n]] for n in range(0, 2)]
 
@@ -139,6 +137,7 @@ class Match(UserDict):
         self['home']['ftot']['odd_val'], self['away']['ftot']['odd_val'] = [
             [line[2][n], hand[2][n], totl[2][n], itot[2][n]] for n in range(0, 2)]
 
+        # делает срезы из массивов 1й дельта, а 2й прибыль
         """ counting First Half if Odds exist
         if dd['odds']['line']['frst']:
             line = self.count_line()

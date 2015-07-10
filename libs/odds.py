@@ -339,8 +339,11 @@ def itot_base(line, total):
         return 5.5 if line < 1.55 else 4.5 if line < 2.2 else 3.5
     elif total == 10.5:
         return 5.5 if line < 2 else 4.5
+    # импровизированные данные, нужно пересчитать
+    elif total == 11.5:
+        return 6.5 if line < 1.4 else 5.5 if line < 1.75 else 4.5
     else:
-        return 0
+        raise BaseException('Baseball total: {}'.format(total))
 
 
 def get_odds(sport, xeid, xhash):

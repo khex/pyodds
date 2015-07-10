@@ -128,12 +128,17 @@ def get_table(meta, diapz):
                         continue
 
                     match.update(decoded)
+                    print('decoded')
                     xhash_score = get_xhash_score(match['link'], meta['sport'])
                     match.update(xhash_score)
+                    print('xhash_score')
 
                     match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'])
+                    print('get_odds')
 
                     m = Match(match)
+                    print('builded')
+
                     resp = matches.save_one(m)
                     print(resp, '\n')
 
