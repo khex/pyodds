@@ -186,13 +186,15 @@ def rows_to_dict(t_data):
         """   get date & time   """
         #  table-time datet t1397689200-1-1-0-0
         date = resp_dict['date']
-        data = int(t_data[0].get('class').split(' ')[2].split('-')[0][1:])
-        date['stamp'] = data
-        # 2014-06-16 03:00:00
-        temp = datetime.datetime.fromtimestamp(data)
-        date['date'] = temp.strftime('%y-%m-%d')
-        date['time'] = temp.strftime('%H:%M')
-        date['datetime'] = temp.strftime('%y-%m-%d %H:%M')
+        ts = int(t_data[0].get('class').split(' ')[2].split('-')[0][1:])
+
+        date['ts'] = str(ts)  # '1397689200'
+        date["iso"] = datetime.datetime.fromtimestamp(ts, None)
+
+        iso_ts = datetime.datetime.fromtimestamp(ts)
+        date['date'] = iso_ts.strftime('%d-%m-%Y')  # '16-06-15'
+        date['time'] = iso_ts.strftime('%H:%M')  # '03:00'
+        date['datetime'] = iso_ts.strftime('%y-%m-%d %H:%M')  # '2015-06-16 03:00'
 
         """ get teams """
         # <a href="/basketball/italy/lega-a/capo-dorlando-milano-dzzJsnCt/">

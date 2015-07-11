@@ -17,4 +17,10 @@ db.getCollection('matches').find({$or: [{'home.team': 'Houston Astros'}, {'away.
     //).sort({'date.timestamp': -1}).count();
 
 match_list = db.matches.find({'league': 'mlb', 'season': '2015', 'seas_type': 'season',
-                              '$or': [{'home.team': 'Houston Astros'}, {'away.team': 'Houston Astros'}] }).sort("datetime.timestamp", -1)
+                              '$or': [{'home.team': 'Houston Astros'}, {'away.team': 'Houston Astros'}] })
+    .sort("datetime.timestamp", -1)
+
+db.getCollection('matches')
+    .find({'league': 'mlb', 'season': '2015', 'seas_type': 'season',
+           '$or': [{'home.team': 'Texas Rangers'}, {'away.team': 'Texas Rangers'}]})
+    .sort({'date.iso_date': 1})

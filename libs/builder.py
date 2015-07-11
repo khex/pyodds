@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import datetime
 from collections import UserDict
-from datetime import datetime
 # from logger import log_db
 odds_value = []
 
@@ -114,7 +114,8 @@ class Match(UserDict):
         self['score'] = dd['score']
         self['odds'] = dd['odds']  # может в каждую команду отдельно???
 
-        self['date']['scraptime'] = datetime.now().strftime('%y-%m-%d %H:%M')
+        # self['date']['scraptime'] = datetime.now().strftime('%y-%m-%d %H:%M')
+        self['date']['scraptime'] = datetime.datetime.utcnow()
         self['home']['team'], self['away']['team'] = dd['teams']
         self['home']['tid'], self['away']['tid'] = dd['tids']
 
@@ -134,7 +135,7 @@ class Match(UserDict):
         self['home']['ftot']['profit'], self['away']['ftot']['profit'] = [
             [line[1][n], hand[1][n], totl[1][n], itot[1][n]] for n in range(0, 2)]
 
-        self['home']['ftot']['odd_val'], self['away']['ftot']['odd_val'] = [
+        self['home']['ftot']['oddval'], self['away']['ftot']['oddval'] = [
             [line[2][n], hand[2][n], totl[2][n], itot[2][n]] for n in range(0, 2)]
 
         # делает срезы из массивов 1й дельта, а 2й прибыль
