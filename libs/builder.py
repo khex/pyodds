@@ -8,102 +8,117 @@ odds_value = []
 
 
 class Match(UserDict):
-    """docstring for Match @ v0.4.142 {
-        'league': 'lega-a',
-        'xeid': 'tGwcHwNl',
-        'season': '2014-2015',
-        'link': '/basketball/italy/lega-a/venezia-sassari-tGwcHwNl/',
-        'sport': 'basketball',
-        'score': {
-            'quat': ['19:21, 19:23, 22:10, 23:29, 7:17'],
-            'ot': True,
-            'full': '90:100',
-            'main': '83:83'},
-        'country': 'italy',
-        'seas_type': 'season',
-        'date': {
-            'scraptime': '2015-07-01 22:36',
-            'timestamp': 1402448400,
-            'datetime': '04-01-15 04:00',
-            'time': '04:00',
-            'date': '11 Jun 2014'},
-        'home': {
-            'team': 'Venezia',
-            'ftot': {
-                'delta': [1, -13.5, 24.5, 5.5],
-                'profit': [54, 90, 92, 89],
-                'resalt': [False, -10, 190, 90]},
-            'frst': {
-                'delta': [1, -13.5, 24.5, 5.5],
-                'profit': [54, 90, 92, 89],
-                'resalt': [False, -10, 190, 90]}},
-        'away': {
-            'team': 'Sassari',
-            'ftot': {
-                'delta': [-1, 13.5, 24.5, 18.5],
-                'profit': [100, -100, 92, 89],
-                'resalt': [True, 10, 190, 100]},
-            'frst': {
-                'delta': [-1, 13.5, 24.5, 18.5],
-                'profit': [100, -100, 92, 89],
-                'resalt': [True, 10, 190, 100]}}
-    }"""
+    """docstring for Match @ ???
+    {
+        "_id": {
+            "$oid": "5659b66817fb2501342104d8"
+        },
+        "seas_list": ["2015-2016", ...,   "2005-2006"],
+        "score": {
+            "quat": ["36:29, 22:24, 24:32, 19:31"],
+            "full": "101:116",
+            "ot": false
+        },
+        "country": "usa",
+        "seas_type": "season",
+        "home": {
+            "team": "Memphis Grizzlies",
+            "tid": 15,
+            "frst": {},
+            "ftot": {
+                "profit": [-100, -100, 89, 0],
+                "delta": [-4.5, -18.5, 21.5, 0],
+                "oddval": [1, -3.5, 195.5, 0],
+                "resalt": [-3.5, -15, 217, 101]
+            }
+        },
+        "date": {
+            "ts": "1448672400",
+            "datetime": "15-11-28 03:00",
+            "date": "28-11-2015",
+            "time": "03:00",
+            "scraptime": {"$date": "2015-11-28T14:12:56.404Z"},
+            "iso": {"$date": "2015-11-28T03:00:00.000Z"},
+
+        },
+        "away.ftot.delta"
+        "away": {
+            "team": "Atlanta Hawks",
+            "tid": 1,
+            "frst": {},
+            "ftot": {
+                "profit": [125, 86, 89, 0],
+                "delta": [4.5, 18.5, 21.5, 0],
+                "oddval": [-1, 3.5, 195.5, 0],
+                "resalt": [3.5, 15, 217, 116]
+            }
+        },
+        "league": "nba",
+        "odds": {
+            "totl": {
+                "ftot": {
+                    "mean": [1.9, 1.92],
+                    "open": [1.89, 1.93],
+                    "value": [195.5, 195.5],
+                    "close": [1.9, 1.92]
+                }
+            },
+            "hand": {
+                "ftot": {
+                    "mean": [1.95, 1.86],
+                    "open": [1.93, 1.88],
+                    "value": [-3.5, 3.5],
+                    "close": [1.97, 1.85]
+                }
+            },
+            "line": {
+                "ftot": {
+                    "mean": [1.64, 2.26],
+                    "open": [1.63, 2.27],
+                    "close": [1.65, 2.25]
+                }
+            },
+            "itot": {
+                "mean": [1.89, 1.89],
+                "open": [1.89, 1.89],
+                "value": [99.5, 96.5],
+                "close": [1.89, 1.89],
+            }
+        },
+        "xeid": "46Qm9Gjh",
+        "link": "/basketball/usa/nba/memphis-grizzlies-atlanta-hawks-46Qm9Gjh/",
+        "sport": "basketball"
+    }
+    """
 
     def __init__(self, dd):
-        """ dd as dict_data {
-            'teams': ['Venezia', 'Sassari'],
-            'link': '/basketball/italy/lega-a/venezia-sassari-tGwcHwNl/',
-            'xeid': 'tGwcHwNl',
-            'xhash': 'yjc0b',
+        """ dd as dict_data
+        {
             'meta': {
-                'season': '2014-2015',
-                'league': 'lega-a',
-                'country': 'italy',
+                'seas_list': ['2015-2016', '2014-2015', ..., '2006-2007', '2005-2006'],
+                'seas_type': 'season',
+                'league': 'nba',
                 'sport': 'basketball',
-                'seas_type': 'season'},
-            'score': {
-                'quat': ['19:21, 19:23, 22:10, 23:29, 7:17'],
-                'full': '90:100',
-                'main': '83:83',
-                'ot': True},
-            'date': {
-                'date': '11 Jun 2014',
-                'time': '04:00',
-                'datetime': '04-01-15 04:00',
-                'timestamp': 1402448400},
+                'country': 'usa'
+            },
+            'xeid': 'rVOKhzkE',
+            'tids': [22, 20],
+            'teams': ['Orlando Magic', 'New York Knicks'],
+            'link': '/basketball/usa/nba/orlando-magic-new-york-knicks-rVOKhzkE/',
+            'xhash': 'yj957',
+            'score': {'full': '100:91', 'ot': False, 'quat': ['20:17, 26:18, 26:28, 28:28']},
             'odds': {
-                'hand': {
-                    'ftot': {
-                        'close': [1.9, 1.88],
-                        'mean': [1.9, 1.88],
-                        'open': [1.89, 1.89],
-                        'value': [-3.5, 3.5]},
-                    'frst': {
-                        'close': [1.87, 1.88],
-                        'mean': [1.87, 1.89],
-                        'open': [1.86, 1.9],
-                        'value': [-1.5, 1.5]}},
-                'line': {
-                    'ftot': {
-                        'close': [1.58, 2.29],
-                        'mean': [1.56, 2.33],
-                        'open': [1.55, 2.36]},
-                    'frst': {
-                        'close': [1.64, 2.14],
-                        'mean': [1.62, 2.17],
-                        'open': [1.61, 2.19]}},
-                'totl': {
-                    'ftot': {
-                        'close': [1.84, 1.92],
-                        'mean': [1.85, 1.92],
-                        'open': [1.85, 1.91],
-                        'value': [165.5, 165.5]},
-                    'frst': {
-                        'close': [1.87, 1.87],
-                        'mean': [1.88, 1.86],
-                        'open': [1.88, 1.85],
-                        'value': [82.5, 82.5]}}}
+                'hand': {'ftot': {'open': [1.90, 1.91], 'value': [-1.5, 1.5], 'mean': [1.91, 1.91], 'close': [1.92, 1.91]}},
+                'line': {'ftot': {'open': [1.79, 2.01], 'close': [1.8, 2.0], 'mean': [1.79, 2.0]}},
+                'itot': {'ftot': {'mean': [1.89, 1.89], 'value': [115.5, 98.5], 'close': [1.89, 1.89], 'open': [1.89, 1.89]}},
+                'totl': {'ftot': {'open': [1.90, 1.91], 'value': [195.5, 195.5], 'mean': [1.92, 1.9], 'close': [1.94, 1.88]}}
+            },
+            'date': {'ts': '1448496000', 'iso': datetime.datetime(2015, 11, 26, 2, 0),
+                     'date': '26-11-2015', 'time': '02:00', 'datetime': '15-11-26 02:00'
+            }
+        }
         """
+
         self.data = {'home': {'ftot': {}, 'frst': {}},
                      'away': {'ftot': {}, 'frst': {}}}
 
@@ -127,6 +142,7 @@ class Match(UserDict):
         line = self.count_line(scor, dd['odds']['line']['ftot'], once_scrd)
         hand = self.count_handy(scor, dd['odds']['hand']['ftot'])
         totl = self.count_total(scor, dd['odds']['totl']['ftot'])
+        # itot = [[0, 0], [0, 0], [0, 0]]
         itot = self.count_i_tot(scor, dd['odds']['itot']['ftot'])
 
         self['home']['ftot']['delta'], self['away']['ftot']['delta'] = [
@@ -138,7 +154,6 @@ class Match(UserDict):
         self['home']['ftot']['oddval'], self['away']['ftot']['oddval'] = [
             [line[2][n], hand[2][n], totl[2][n], itot[2][n]] for n in range(0, 2)]
 
-        # делает срезы из массивов 1й дельта, а 2й прибыль
         """ counting First Half if Odds exist
         if dd['odds']['line']['frst']:
             line = self.count_line()

@@ -9,13 +9,21 @@ bin/mongod.exe --config mongodb.conf
 from pymongo import MongoClient
 # import pymongo, bson
 # from bson.objectid import ObjectId
-# from logger import log_db
+from logger import log_db
 
-
+""" for local mongoDB
 client = MongoClient('mongodb://localhost:27017/')
 db = client['delta_test']
-# db.collection_names()
-# print(dir(db)) проверить доступность каким-то методом
+"""
+""" https://mongolab.com
+    Account name: qm69    pass: saturn69
+    DBUser  name: stavros pass: balalajka7
+    Email: qm69@ua.fm
+"""
+
+MONGODB_URI = "mongodb://stavros:balalajka7@ds057934.mongolab.com:57934/deltabase"
+client = MongoClient(MONGODB_URI)
+db = client.get_default_database()
 
 
 class Teams(object):

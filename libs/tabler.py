@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
+sys.path.append('C:/Users/qm69/Code/pyodds/libs')
+
 import re
 import json
 import requests
 import datetime
 from bs4 import BeautifulSoup
-from mdb import teams, matches
+from mongodb import teams
+from mongodb import matches
 from odds import get_odds
 from builder import Match
 from logger import log_tabler
@@ -18,7 +22,7 @@ from logger import log_tabler
 """
 
 
-def get_table(meta, diapz):
+def get_table(meta, meta_seas, diapz):
     """ Строит адресс ссылки из аргументов и заданого диапазона.
         Идет на страницу с таблицой результатов, где фильтрует
         "table rows" только с матчем и создает массив из данных с классами:
@@ -37,8 +41,7 @@ def get_table(meta, diapz):
             sezon @ str: '2015'
             diapz @ range: range(1, 50)
 
-        Return: list of {
-            'Page done!''
+        Return: ???
     """
     # usa/nba/results/#/page/2/ || usa/nba-2013-2014/results/#/page/2/
     domen = 'http://www.oddsportal.com'
@@ -47,13 +50,16 @@ def get_table(meta, diapz):
     Если сезон не этого года, тогда '' иначе '2011-2012'
     ! переделать на димично
     """
-    seas_tmpl = '' if meta['season'] in ['2015', '2014-2015'] else '-' + meta['season']
+    # нюанс ссылки - если теперешний сезон - то год не нужно ставить
+    seas_tmpl = '' if meta_seas in ['2015', '2015-2016'] else '-' + meta_seas
     seas_type = ''
 
     for iks in diapz:
-        url = link_template.format(domen, meta['sport'], meta['country'],
-                                   meta['league'], seas_tmpl, iks)
-        print(url)
+        url = link_template.format(domen,
+                                   meta['sport'],
+                                   meta['country'],
+                                   meta['league'],
+                                   seas_tmpl, iks)
         r = requests.get(url)
         if r.status_code != 200:
             print('results page status code is {}'.format(r.status_code))
@@ -128,13 +134,14 @@ def get_table(meta, diapz):
                         continue
 
                     match.update(decoded)
-                    print('decoded')
                     xhash_score = get_xhash_score(match['link'], meta['sport'])
                     match.update(xhash_score)
-                    print('xhash_score')
 
-                    match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'])
-                    print('get_odds')
+                    match['odds'] = get_odds(
+                        meta['sport'],
+                        match['xeid'],
+                        match['xhash']
+                    )
 
                     m = Match(match)
                     print('builded')
@@ -210,12 +217,12 @@ def rows_to_dict(t_data):
         if home:
             resp_dict['tids'][0] = home['tid']
         else:
-            raise Exception('Team \'{}\' not in DB'.format(resp_dict['teams'][0]))
+            raise Exception('\n\nTeam \'{}\' is not in DB\n'.format(resp_dict['teams'][0]))
 
         if away:
             resp_dict['tids'][1] = away['tid']
         else:
-            raise Exception('Team \'{}\' not in DB'.format(resp_dict['teams'][1]))
+            raise Exception('\n\nTeam \'{}\' is not in DB\n'.format(resp_dict['teams'][1]))
 
         return resp_dict
 
@@ -299,8 +306,8 @@ def get_xhash_score(arg_url, sport):
 
 if __name__ == '__main__':
 
-    modl_list = dict(sport='baseball', country='usa',
-                     league='mlb', season='2015')
+    modl_list = dict(sport='baseball', country='usa', league='mlb', season='2015')
+    # modl_list = dict(sport='baseball', country='japan', league='npb', season='2015')
     diapazon = range(1, 50)
     resp = get_table(modl_list, diapazon)
     print(resp)

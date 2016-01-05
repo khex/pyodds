@@ -4,8 +4,8 @@
 import sys
 sys.path.append('C:/Users/qm69/Code/delta_odds/libs')
 
-from mdb import modules
-from mdb import teams
+from mongodb import modules
+from mongodb import teams
 
 m_data = {
     "mhsh": "bbitla",  # unique
@@ -48,3 +48,11 @@ team_dict = [
     dict(tid=64, full="Virtus Bologna", short="virtus-bologna", seasons=('2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011', '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006')),
     dict(tid=65, full="Virtus Roma", short="virtus-roma", seasons=('2010-2011', '2014-2015', '2013-2014', '2012-2013', '2011-2012', '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006')),
 ]
+
+
+if __name__ == '__main__':
+
+    for t in team_dict:
+        t['module'] = m_data
+    modules.save_one(m_data)
+    teams.save_many(team_dict)

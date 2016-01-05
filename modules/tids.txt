@@ -1,0 +1,6 @@
+001 - 030  =>  bbusnb:  basketball  USA    NBA
+035 - 065  =>  bbitla:  basketball  Italy  Lega A
+068 - 099  =>  bsuaml:  baseball    USA    MLB
+100 - 112  =>  bsjpnp:  baseball    Japan  NPB
+
+Empty: 31, 32, 33, 34, 66, 67

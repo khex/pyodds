@@ -1,4 +1,0 @@
-  1 -  30  =>  bbusnb:  basketball  USA     NBA
- 35 -  65  =>  bbitla:  basketball  Italy   Lega A
- 70 -  99  =>  bsuaml:  baseball    USA     MLB
-100 - 
