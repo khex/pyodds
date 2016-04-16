@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append('C:/Users/qm69/Code/pyodds/libs')
+sys.path.append("C:/Users/qm69/Code/pyodds/libs")
 
 from mongodb import modules
 from mongodb import teams
@@ -48,7 +48,11 @@ team_dict = [
     dict(tid=27, opid="IwmkErSH", full="San Antonio Spurs", short="san-antonio-spurs", seasons=year),
     dict(tid=28, opid="CxtbCMdU", full="Toronto Raptors", short="toronto-raptors", seasons=year),
     dict(tid=29, opid="hGuCX5Su", full="Utah Jazz", short="utah-jazz", seasons=year),
-    dict(tid=30, opid="W6vGWPsn", full="Washington Wizards", short="washington-wizards", seasons=year)
+    dict(tid=30, opid="W6vGWPsn", full="Washington Wizards", short="washington-wizards", seasons=year),
+    dict(tid=31, opid="zuG9MVqq", full="East", short="east", seasons=year),
+    dict(tid=32, opid="", full="West", short="West", seasons=year),
+    dict(tid=33, opid="dxdenFmO", full="Team World", short="team-world", seasons=year),
+    dict(tid=34, opid="", full="Team USA", short="Team-USA", seasons=year),
 ]
 
 

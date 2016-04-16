@@ -14,11 +14,13 @@ Usage:
 
 Options:
     python scraper.py full bbusnb '2015-2016'
+    python scraper.py full bsusml '2016'
     -d --debug          Show debug messages.
     -h --help           Show this screen.
     -v --version        Show version.
 """
-""" python scraper.py full bbusnb '2015-2016'
+""" old version
+    python scraper.py full bbusnb '2015-2016'
     scraper.py full bsusml 2012-2013 1 36
         "full": true,
         "<mhsh>": "bsusml",
@@ -49,14 +51,16 @@ shot = ['2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008', '2007', 
 leng = ['2015-2016', '2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011',
         '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006']
 
-mhsh_dict = {'bsusml': dict(sport='baseball', country='usa', league='mlb', seas_list=shot),
-             'bbitla': dict(sport='basketball', country='italy', league='lega-a', seas_list=leng),
-             'bbusnb': dict(sport='basketball', country='usa', league='nba', seas_list=leng)}
+mhsh_dict = {
+    'bsusml': dict(sport='baseball', country='usa', league='mlb', seas_list=shot),
+    'bbitla': dict(sport='basketball', country='italy', league='lega-a', seas_list=leng),
+    'bbusnb': dict(sport='basketball', country='usa', league='nba', seas_list=leng),
+    'hkusnh': dict(sport='hockey', country='usa', league='nhl', seas_list=leng),
+}
 
 """ Посылает массив из годов, зачем ? """
 args = docopt(__doc__, version='0.5.221')
 season, mhsh = args['<seas>'], args['<mhsh>']
-print(season)
 module = mhsh_dict[mhsh]
 
 if args['full'] is True:

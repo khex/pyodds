@@ -35,9 +35,10 @@ home_team = team_list[0]
 away_team = team_list[1]
 
 
-def colorator(spot, match):
-    """ smth about the function """
-
+def painter(spot, match):
+    """
+    Возвращает подкрашеную строку текста.
+    """
     line = match[spot]['ftot']['delta'][0]
     hand = match[spot]['ftot']['delta'][1]
     totl = match[spot]['ftot']['delta'][2]
@@ -51,12 +52,12 @@ def colorator(spot, match):
         colored(' ' + str(line) if line > 0 else str(line), 'magenta' if line > 0 else 'red'),
         colored(' ' + str(hand) if hand > 0 else str(hand), 'magenta' if hand > 0 else 'red'),
         colored(' ' + str(totl) if totl > 0 else str(totl), 'magenta' if totl > 0 else 'red'),
-        colored(' ' + str(itot) if itot > 0 else str(itot), 'magenta' if itot > 0 else 'red'))
-
+        colored(' ' + str(itot) if itot > 0 else str(itot), 'magenta' if itot > 0 else 'red')
+    )
     print(text)
 
 
-""" home ever """
+# host ever
 team_dict = [{'home.team': home_team}, {'away.team': home_team}]
 query = {'league': league, 'seas_type': 'season', '$or': team_dict}
 match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(10)
@@ -64,19 +65,20 @@ match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(10)
 cprint(' {:^40} '.format(home_team), 'blue', 'on_white')
 for match in match_list:
     spot = 'home' if match['home']['team'] == home_team else 'away'
-    colorator(spot, match)
+    painter(spot, match)
 
 
-""" home home """
+# host home
+"""
 query = {'league': league, 'seas_type': 'season', 'home.team': away_team}
 match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(10)
 
 cprint(' {:^40} '.format(home_team), 'blue', 'on_white')
 for match in match_list:
-    colorator('home', match)
+    painter('home', match)
+"""
 
-
-""" away ever """
+# gest ever
 team_dict = [{'home.team': away_team}, {'away.team': away_team}]
 query = {'league': league, 'seas_type': 'season', '$or': team_dict}
 match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(10)
@@ -84,13 +86,15 @@ match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(10)
 cprint(' {:^40} '.format(away_team), 'blue', 'on_white')
 for match in match_list:
     spot = 'home' if match['home']['team'] == away_team else 'away'
-    colorator(spot, match)
+    painter(spot, match)
 
 
-""" away away """
+# gest away
+"""
 query = {'league': league, 'seas_type': 'season', 'away.team': away_team}
 match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(10)
 
 cprint(' {:^40} '.format(away_team), 'blue', 'on_white')
 for match in match_list:
-    colorator('away', match)
+    painter('away', match)
+"""

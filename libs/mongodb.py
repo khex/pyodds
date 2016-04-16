@@ -53,6 +53,9 @@ class Matches(object):
     def find_xeid(self, xeid):
         return self.__matches.find_one({'xeid': xeid})
 
+    def delete_many(self, league):
+        return self.__matches.remove({"league": league})
+
 
 class Modules(object):
     """docstring for ClassName"""

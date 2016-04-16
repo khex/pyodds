@@ -1,6 +1,7 @@
-001 - 030  =>  bbusnb:  basketball  USA    NBA
+001 - 034  =>  bbusnb:  basketball  USA    NBA
 035 - 065  =>  bbitla:  basketball  Italy  Lega A
 068 - 099  =>  bsuaml:  baseball    USA    MLB
 100 - 112  =>  bsjpnp:  baseball    Japan  NPB
+113 - 142  =>  hkusnh:  hockey      USA    NHL
 
-Empty: 31, 32, 33, 34, 66, 67
+Empty: 66, 67

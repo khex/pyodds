@@ -9,8 +9,11 @@ import requests
 # import multiprocessing as mp
 from statistics import mean
 from logger import log_odds
-
-"""      \  home_away  -> get_page -> map_close \
+"""
+@doc-bug: MLB если pre-season и нет данніх линии - еррор
+"""
+"""  Для каждого вида спорта отдельно
+         \  home_away  -> get_page -> map_close \
 get_odds  > asian_handy -> get_page -> map_close  >
          /  home_away -> get_page -> map_close /
 """
@@ -37,7 +40,6 @@ def get_page(pref, xeid, xhash, value):
         domain = 'http://fb.oddsportal.com/feed/match'
         link_text = '{}/{}-{}-{}-{}.dat'
         link = link_text.format(domain, pref, xeid, value, xhash)
-
         r = requests.get(link)  # .encoding = 'ISO-8859-1'
         if r.status_code != 200:
             raise('results page status code is {}'.format(r.status_code))
@@ -202,6 +204,7 @@ def asian_handy(pref, xeid, xhash, args_dict):
                 'mean': [2.19, 1.71],
                 'value': [-0.5, 0.5]}}
     """
+    pref, xeid, xhash, args_dict
     try:
         resp_dict = {}
         for period, value in args_dict.items():  # period: 'ftot', value: '3-1'
@@ -374,6 +377,10 @@ def itot_basket(total, h_cap):
             return half_totl + abs_cup if h_cap < 0 else half_totl + 0.5
 
 
+def itot_hockey(total, h_cap):
+    return 17.5
+
+
 def get_odds(sport, xeid, xhash):
     """         1x2   O/U   H/A   Asian   O/E
     FTOT        1-1   2-1   3-1    5-1   10-1
@@ -385,14 +392,27 @@ def get_odds(sport, xeid, xhash):
     3 Quater    1-10  2-10  3-10   5-10  10-10
     4 Quater    1-11  2-11  3-11   5-11  10-11
     """
-    """
-    mp.freeze_support()
-    pool = mp.Pool(processes=3)
-
+    resp = {}
     if sport == 'baseball':
-        resp = {'line': pool.apply(home_away, args=('1-6', xeid, xhash, dict(ftot='3-1'))),    # , frst='3-3'))),
-                'hand': pool.apply(asian_handy, args=('1-6', xeid, xhash, dict(ftot='5-1'))),  # , frst='5-3'))),
-                'totl': pool.apply(over_under, args=('1-6', xeid, xhash, dict(ftot='2-1')))}   # , frst='2-3')))}
+        resp['line'] = home_away('1-6', xeid, xhash, {'ftot': '3-1'})  # , frst='3-3')))
+        resp['hand'] = asian_handy('1-6', xeid, xhash, {'ftot': '5-1'})  # , frst='5-3'))),
+        resp['totl'] = over_under('1-6', xeid, xhash, {'ftot': '2-1'})   #
+
+        resp_totl = resp['totl']['ftot']['value']
+        resp_hand = resp['hand']['ftot']['value']
+
+        # params: line, total
+        itot_home = itot_base(resp['line']['ftot']['mean'][0], resp_totl[0])
+        itot_away = itot_base(resp['line']['ftot']['mean'][1], resp_totl[1])
+
+        resp['itot'] = {'ftot': dict(
+            value=[itot_home, itot_away],
+            mean=[1.89, 1.89],
+            open=[1.89, 1.89],
+            close=[1.89, 1.89]
+        )}
+
+        """      
         pool.close()
          { для 'pre-seas' нет Тотал значения
         'hand': {
@@ -405,7 +425,7 @@ def get_odds(sport, xeid, xhash):
             'ftot': {},
             'frst': {}}
         }
-         считать только когда присутств Линия и Тотал (имеют значение не [0, 0])
+        считать только когда присутств Линия и Тотал (имеют значение не [0, 0])
         if resp['line']['ftot']['mean'] != [0, 0] and resp['totl']['ftot']['value'] != [0, 0]:
             resp['itot'] = dict(ftot={
                 'mean': [1.89, 1.89], 'open': [0, 0], 'close': [0, 0],
@@ -413,12 +433,28 @@ def get_odds(sport, xeid, xhash):
                           itot_base(resp['line']['ftot']['mean'][1], resp['totl']['ftot']['value'][1])]})
         else:
             resp['itot'] = dict(ftot={'value': [0, 0], 'mean': [0, 0], 'open': [0, 0], 'close': [0, 0]})
+
         """
+        return resp
+
     if sport == 'basketball':
-        resp = {}
+
         resp['line'] = home_away('1-3', xeid, xhash, {'ftot': '3-1'})  # , frst='3-3')))
         resp['hand'] = asian_handy('1-3', xeid, xhash, {'ftot': '5-1'})  # , frst='5-3'))),
         resp['totl'] = over_under('1-3', xeid, xhash, {'ftot': '2-1'})   # , frst='2-3')))}
+
+        resp_totl = resp['totl']['ftot']['value']
+        resp_hand = resp['hand']['ftot']['value']
+
+        itot_home = itot_basket(resp_totl[0], resp_hand[0])
+        itot_away = itot_basket(resp_totl[1], resp_hand[1])
+
+        resp['itot'] = {'ftot': dict(
+            value=[itot_home, itot_away],
+            mean=[1.89, 1.89],
+            open=[1.89, 1.89],
+            close=[1.89, 1.89]
+        )}
 
         """
         Написчать iTotal функцию для баскетбола
@@ -434,16 +470,23 @@ def get_odds(sport, xeid, xhash):
             resp['itot'] = dict(ftot={'value': [0, 0], 'mean': [0, 0], 'open': [0, 0], 'close': [0, 0]})
         """
 
+        return resp
+
+    if sport == 'hockey':
+
+        resp['line'] = home_away('1-4', xeid, xhash, {'ftot': '3-1'})    # , frst='3-3')))
+        resp['hand'] = asian_handy('1-4', xeid, xhash, {'ftot': '5-1'})  # , frst='5-3'))),
+        resp['totl'] = over_under('1-4', xeid, xhash, {'ftot': '2-1'})   # , frst='2-3')))}
+
         resp_totl = resp['totl']['ftot']['value']
         resp_hand = resp['hand']['ftot']['value']
 
-        itot_home = itot_basket(resp_totl[0], resp_hand[0])
-        itot_away = itot_basket(resp_totl[1], resp_hand[1])
+        itot_home = itot_hockey(resp_totl[0], resp_hand[0])
+        itot_away = itot_hockey(resp_totl[1], resp_hand[1])
 
-        resp['itot'] = {'ftot': dict(value=[itot_home, itot_away],
-                                     mean=[1.89, 1.89],
-                                     open=[1.89, 1.89],
-                                     close=[1.89, 1.89])}
+        resp['itot'] = {
+            'ftot': dict(value=[itot_home, itot_away], mean=[1.89, 1.89], open=[1.89, 1.89], close=[1.89, 1.89])
+        }
 
         return resp
 
@@ -483,6 +526,8 @@ if __name__ == '__main__':
         }
     """
     # basketball/usa/nba/portland-trail-blazers-memphis-grizzlies-lpZAkkL7/
-    sport, xeid, xhash = 'basketball', 'lpZAkkL7', 'yj749'
+    # sport, xeid, xhash = 'basketball', 'lpZAkkL7', 'yj749'
+    sport, xeid, xhash = 'baseball', 'OMcw0nF8','yjdbb'
     respont = get_odds(sport, xeid, xhash)
+
     print(respont)

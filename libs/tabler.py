@@ -51,19 +51,21 @@ def get_table(meta, meta_seas, diapz):
     ! переделать на димично
     """
     # нюанс ссылки - если теперешний сезон - то год не нужно ставить
-    seas_tmpl = '' if meta_seas in ['2015', '2015-2016'] else '-' + meta_seas
+    seas_tmpl = '' if meta_seas in ['2016', '2015-2016'] else '-' + meta_seas
     seas_type = ''
 
     for iks in diapz:
-        url = link_template.format(domen,
-                                   meta['sport'],
-                                   meta['country'],
-                                   meta['league'],
-                                   seas_tmpl, iks)
+        url = link_template.format(
+            domen,
+            meta['sport'],
+            meta['country'],
+            meta['league'],
+            seas_tmpl, iks)
+
         r = requests.get(url)
         if r.status_code != 200:
             print('results page status code is {}'.format(r.status_code))
-            break
+            sys.exit()  # ex. break
         r.encoding = 'ISO-8859-1'
 
         r_string = str(r.content)
@@ -99,16 +101,19 @@ def get_table(meta, meta_seas, diapz):
                 # 'center nob-border' Season data
                 if clss == 'center nob-border':
                     game_type = tag.find('th').text[:-3].strip()
+                    print(game_type)
                     if game_type == '- Play Offs12B':
                         seas_type = 'play-offs'
                     elif game_type == '- Pre-season12B':
                         seas_type = 'pre-season'
                     elif game_type == '- Wild Card12B':
                         seas_type = 'wild-card'
-                    elif game_type == '12B':
+                    elif game_type == '- All Stars12B':
+                        seas_type = 'all-stars'
+                    elif game_type == '12B' or game_type == '1X2B':
                         seas_type = 'season'
                     else:
-                        seas_type = 'undefined'
+                        raise BaseException('Undefined season type')
 
                 # 'odd deactivate', ' deactivate'
                 elif clss == ' deactivate' or clss == 'odd deactivate':
@@ -136,15 +141,12 @@ def get_table(meta, meta_seas, diapz):
                     match.update(decoded)
                     xhash_score = get_xhash_score(match['link'], meta['sport'])
                     match.update(xhash_score)
+                    
+                    print( meta['sport'], match['xeid'], match['xhash'] )
 
-                    match['odds'] = get_odds(
-                        meta['sport'],
-                        match['xeid'],
-                        match['xhash']
-                    )
+                    match['odds'] = get_odds( meta['sport'], match['xeid'], match['xhash'] )
 
                     m = Match(match)
-                    print('builded')
 
                     resp = matches.save_one(m)
                     print(resp, '\n')
@@ -293,6 +295,14 @@ def get_xhash_score(arg_url, sport):
             score['quat'] = re.findall('\(([X:\d+,*\s*]+)\)', text)[0]
             score['ot'] = False if len(score['quat'].split(', ')) == 9 else True
 
+        elif sport == 'hockey':
+            # "Final result 3:2 (1:0, 0:2, 2:0)"
+            # "Final result 5:4 OT (0:1, 3:0, 1:3, 1:0)"
+            # "Final result 2:1 penalties (1:0, 0:1, 0:0, 0:0, 2:0)"
+            score['full'] = re.findall('\s+(\d+:\d+)\s+', text)[0]  # '1:2'
+            score['quat'] = re.findall('\(([X:\d+,*\s*]+)\)', text)[0]  # ???
+            score['ot'] = False if len(score['quat'].split(', ')) == 9 else True
+
         # <p class="result-alert"><span class="bold">postponed</span></p>
         elif mtch_rslt == 'result-alert':
             log_tabler.info('Result Alert (match was canseled)')
@@ -305,9 +315,9 @@ def get_xhash_score(arg_url, sport):
         log_tabler('Func get_xhash_score()')
 
 if __name__ == '__main__':
-
-    modl_list = dict(sport='baseball', country='usa', league='mlb', season='2015')
+    modl_list = dict(sport='hockey', country='usa', league='nhl', season='2015-2016')
+    # modl_list = dict(sport='baseball', country='usa', league='mlb', season='2015')
     # modl_list = dict(sport='baseball', country='japan', league='npb', season='2015')
     diapazon = range(1, 50)
-    resp = get_table(modl_list, diapazon)
+    resp = get_table(modl_list, '2015-2016', diapazon)
     print(resp)

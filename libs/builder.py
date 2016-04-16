@@ -249,13 +249,16 @@ class Match(UserDict):
         return [delta, profit, odds_value]
 
     def count_handy(self, score, handy):
+        print(score, handy)
         """
         Считает дельту по форе & профит:
         Return:
             (7.5, -7.5)
         """
-        delta = [self['home']['ftot']['resalt'][1] + handy['value'][0],
-                 self['away']['ftot']['resalt'][1] + handy['value'][1]]
+        delta = [
+            self['home']['ftot']['resalt'][1] + handy['value'][0],
+            self['away']['ftot']['resalt'][1] + handy['value'][1]
+        ]
 
         # подсчет прибыли
         if delta[0] > delta[1]:
