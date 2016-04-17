@@ -98,3 +98,4 @@ cprint(' {:^40} '.format(away_team), 'blue', 'on_white')
 for match in match_list:
     painter('away', match)
 """
+

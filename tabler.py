@@ -80,7 +80,9 @@ cprint(' {:^45}|{:^44}'.format(home_team, away_team), 'blue', 'on_white')
 for i in range(longest):
     host_spot = 'home' if home_list[i]['home']['team'] == home_team else 'away'
     gest_spot = 'home' if away_list[i]['home']['team'] == away_team else 'away'
+
     host_text = painter(host_spot, home_list[i])
     gest_text = painter(gest_spot, away_list[i])
+
     line_tmpl = '  {}. {} | {}. {}'.format(i + 1, host_text, i + 1, gest_text)
     print(line_tmpl)
