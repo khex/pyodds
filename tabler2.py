@@ -5,21 +5,21 @@
 Odds portal scraper
 
 Usage:
-    statist.py <league> <teams>
-    statist.py -d | --debug
+    statist.py <league>
     statist.py -v | --version
     statist.py -h | --help
 
 Options:
-    -d --debug          Show debug messages.
-    -h --help           Show this screen.
-    -v --version        Show version.
+    -h --help       Show this screen.
+    -v --version    Show version.
+    <league>        Some text.
 """
 
 from docopt import docopt
 from termcolor import colored
 from termcolor import cprint
 from pymongo import MongoClient
+from libs.tabler import get_next
 
 
 MONGODB_URI = "mongodb://stavros:balalajka7@ds057934.mongolab.com:57934/deltabase"
@@ -27,10 +27,7 @@ client = MongoClient(MONGODB_URI)
 db = client.get_default_database()
 
 args = docopt(__doc__, version='0.3.1')
-
 league = args['<league>']
-home_team, away_team = args['<teams>'].split(' - ')
-
 
 def painter(spot, match):
     """
@@ -75,43 +72,49 @@ def monger(tean_name, spot):
     return list(match_list)        
 
 
-""" Ever and EVER """
-home_list, away_list = monger(home_team, 'ever'), monger(away_team, 'ever')
-longest = max(len(home_list), len(away_list))
-cprint(' {:^47}|{:^44}'.format(home_team, away_team), 'blue', 'on_white')
+next_team_list = get_next()
+for teams in next_team_list:
+    print('\n')
+    home_team, away_team = teams.split(' - ')
 
-for i in range(longest):
-    try:
-        host_spot = 'home' if home_list[i]['home']['team'] == home_team else 'away'
-        host_text = painter(host_spot, home_list[i])
-    except:
-        host_text = ' ' * 45
+    """ Ever and EVER """
+    home_list, away_list = monger(home_team, 'ever'), monger(away_team, 'ever')
+    longest = max(len(home_list), len(away_list))
+    cprint(' {:^47}|{:^47}'.format(home_team, away_team), 'blue', 'on_white')
 
-    try:
-        gest_spot = 'home' if away_list[i]['home']['team'] == away_team else 'away'
-        gest_text = painter(gest_spot, away_list[i])
-    except:
-        gest_text = ' ' * 45
+    for i in range(longest):
+        try:
+            host_spot = 'home' if home_list[i]['home']['team'] == home_team else 'away'
+            host_text = painter(host_spot, home_list[i])
+        except:
+            host_text = ' ' * 45
 
-    line_tmpl = '  {:>2}. {}  | {:>2}. {}'.format(i + 1, host_text, i + 1, gest_text)
-    print(line_tmpl)
+        try:
+            gest_spot = 'home' if away_list[i]['home']['team'] == away_team else 'away'
+            gest_text = painter(gest_spot, away_list[i])
+        except:
+            gest_text = ' ' * 45
+
+        line_tmpl = '  {:>2}. {}  | {:>2}. {}'.format(i + 1, host_text, i + 1, gest_text)
+        print(line_tmpl)
 
 
-""" HOME and AWAY """
-host_list, gest_list = monger(home_team, 'home'),  monger(away_team, 'away')
-longest = max(len(host_list), len(gest_list))
-cprint(' {:^47}|{:^44}'.format(home_team, away_team), 'blue', 'on_white')
+    """ HOME and AWAY """
+    host_list, gest_list = monger(home_team, 'home'),  monger(away_team, 'away')
+    longest = max(len(host_list), len(gest_list))
+    cprint(' {:^47}|{:^47}'.format(home_team, away_team), 'blue', 'on_white')
 
-for i in range(longest):
-    try:
-        host_text = painter('home', host_list[i])
-    except:
-        host_text = ' ' * 45
+    for i in range(longest):
+        try:
+            host_text = painter('home', host_list[i])
+        except:
+            host_text = ' ' * 45
 
-    try:
-        gest_text = painter('away', gest_list[i])
-    except:
-        gest_text = ' ' * 45
+        try:
+            gest_text = painter('away', gest_list[i])
+        except:
+            gest_text = ' ' * 45
 
-    line_tmpl = '  {:>2}. {}  | {:>2}. {}'.format(i + 1, host_text, i + 1, gest_text)
-    print(line_tmpl)
+        line_tmpl = '  {:>2}. {}  | {:>2}. {}'.format(i + 1, host_text, i + 1, gest_text)
+        print(line_tmpl)
+
