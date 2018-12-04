@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-cd 'C:\env\mongodb\'
+cd 'C:/env/mongodb/'
 bin/mongod.exe --config mongodb.conf
 """
 
@@ -67,6 +67,6 @@ class Modules(object):
         # return self.__modules.find_one({'_id': m_id})
         return m_id
 
-teams = Teams()
+teams   = Teams()
 matches = Matches()
 modules = Modules()

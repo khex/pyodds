@@ -23,10 +23,13 @@ def grouper(arg):
 
 
 def panda(arg1, arg2, league, season, seas_type):
-    teams = list(db.teams.find({'$and': [{'tid': {'$gte': arg1}},
-                                         {'tid': {'$lte': arg2}}]},
-                               {'full': 1, 'short': 1})
-                         .sort('full', 1))
+    teams = list(db.teams.find(
+            {'$and': [
+                {'tid': {'$gte': arg1}},
+                {'tid': {'$lte': arg2}}
+            ]},
+            {'full': 1, 'short': 1})
+        .sort('full', 1))
     full_names = [team['full'] for team in teams]
     shot_names = [team['short'] for team in teams]
 

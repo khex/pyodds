@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append('C:/Users/qm69/Code/pyodds/libs')
+sys.path.append('C:/Users/khex/Code/pyodds/libs')
 
 import re
 import json
+import pprint
 import requests
 import datetime
 from bs4 import BeautifulSoup
@@ -45,41 +46,50 @@ def get_table(meta, meta_seas, diapz):
         Return: ???
     """
     # usa/nba/results/#/page/2/ || usa/nba-2013-2014/results/#/page/2/
-    domen = 'http://www.oddsportal.com'
-    link_template = '{}/{}/{}/{}{}/results/#/page/{}/'
+    
     """
     Если сезон не этого года, тогда '' иначе '2011-2012'
     ! переделать на димично
     """
-    # нюанс ссылки - если теперешний сезон - то год не нужно ставить
-    seas_tmpl = '' if meta_seas in ['2016', '2015-2016'] else '-' + meta_seas
+    # нюанс ссылки: если это теперешний сезон - то год не нужно ставить
+    seas_tmpl = '' if meta_seas in ['2018', '2018-2019'] else '-' + meta_seas
     seas_type = ''
 
     for iks in diapz:
-        url = link_template.format(
-            domen,
-            meta['sport'],
-            meta['country'],
-            meta['league'],
-            seas_tmpl, iks)
+        domen = 'https://www.oddsportal.com'
+        tmpl_template = '{}/{}/{}{}/results/#/page/{}/'
+        url = tmpl_template.format(meta['sport'], meta['country'], meta['league'], seas_tmpl, iks)
 
-        r = requests.get(url)
+        # https://stackoverflow.com/questions/33350956/why-python-requests-get-a-404-error
+        link = 'https://www.oddsportal.com/' + url
+
+        proxy = {'http': 'http://www.oddsportal.com/' + url}
+        r = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
+
         if r.status_code != 200:
             print('results page status code is {}'.format(r.status_code))
-            sys.exit()  # ex. break
+            sys.exit()
         r.encoding = 'ISO-8859-1'
 
         r_string = str(r.content)
         starts = r_string.find('var page = new PageTournament') + 30
         ends = r_string.find(');var menu_open')
         params = json.loads(r_string[starts:ends])
+        print(params)
 
-        link_one = 'http://fb.oddsportal.com/ajax-sport-country-tournament-'
-        link_two = 'archive/{}/{}/X0/1/3/{}?_=1432400166447'
-        ajax_link = str(link_one + link_two).format(params['sid'], params['id'], iks)
+        # Что єто за ссілка ???
+        tmpl_one = 'https://fb.oddsportal.com/ajax-sport-country-tournament-'
+        tmpl_two = 'archive/{}/{}/X0/1/3/{}?_=1543761020036'
+        ajax_link = str(tmpl_one + tmpl_two).format(params['sid'], params['id'], iks)
+        print(ajax_link)
 
         # requests 'r', 'q', 's', 't'
-        q = requests.get(ajax_link)
+        headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
+            'referer': 'https://www.oddsportal.com/basketball/usa/nba/philadelphia-76ers-dallas-mavericks-fL8bbADr/'
+        }
+        q = requests.get(ajax_link, headers=headers)
+
         if q.status_code != 200:
             print('results page status code is {}'.format(q.status_code))
         q.encoding = 'ISO-8859-1'
@@ -87,7 +97,8 @@ def get_table(meta, meta_seas, diapz):
         q_string = str(q.content)
         starts = q_string.find('html')
         raw_text = q_string[starts + 7:-19].replace('\\\\/', '/').replace('\\\\"', '"')
-        soup = BeautifulSoup(raw_text, ['lxml', 'xml'])
+        
+        soup = BeautifulSoup(raw_text, "lxml-xml")
 
         """ BeautifulSoup """
         if soup.find(id='tournamentTable').find(class_='cms'):
@@ -96,6 +107,7 @@ def get_table(meta, meta_seas, diapz):
         else:
             soup_list = soup.find('table').find_all('tr')
 
+            # why slise ???
             for tag in soup_list[1:]:
                 clss = tag.get('class')
 
@@ -145,18 +157,25 @@ def get_table(meta, meta_seas, diapz):
                     
                     print( meta['sport'], match['xeid'], match['xhash'] )
 
-                    match['odds'] = get_odds( meta['sport'], match['xeid'], match['xhash'] )
+                    match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'] )
 
+                    pp = pprint.PrettyPrinter(indent=2)
+                    pp.pprint(match)
+                    
                     m = Match(match)
 
                     resp = matches.save_one(m)
                     print(resp, '\n')
+
+                else:
+                    pass
 
             print('Page done.')
     return('Well Done')
 
 
 def rows_to_dict(t_data):
+
     """ Парсит рядки из таблицы результатов из 'bs4_html_tag' в словарь
 
         Arguments:
@@ -227,6 +246,7 @@ def rows_to_dict(t_data):
         else:
             raise Exception('\n\nTeam \'{}\' is not in DB\n'.format(resp_dict['teams'][1]))
 
+        print(resp_dict)
         return resp_dict
 
     except Exception:
@@ -253,7 +273,11 @@ def get_xhash_score(arg_url, sport):
         resp_dict = dict(score={})
 
         # partilas\match_page.html 1417
-        p = requests.get('http://www.oddsportal.com' + arg_url)
+        headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
+            'referer': 'https://www.oddsportal.com/basketball/usa/nba/philadelphia-76ers-dallas-mavericks-fL8bbADr/'
+        }
+        p = requests.get('https://www.oddsportal.com' + arg_url, headers=headers)
         p.encoding = 'ISO-8859-1'
         raw_text = str(p.content)
 
@@ -268,7 +292,7 @@ def get_xhash_score(arg_url, sport):
         resp_dict['xhash'] = xhash
 
         """ score 'partials/match_score.html'  """
-        soup = BeautifulSoup(p.content)
+        soup = BeautifulSoup(p.content, 'lxml')
         html = soup.find(id='event-status')
         text = html.text.replace(u'\xa0', u' ')
 
@@ -315,13 +339,14 @@ def get_xhash_score(arg_url, sport):
     except Exception:
         log_tabler('Func get_xhash_score()')
 
+
 def get_next():
     """ static function only for MLB !!!
-    returns list of teams for the next match
-    ['New York Yankees - Seattle Mariners', ... ]
+        returns list of teams for the next match
+        ['New York Yankees - Seattle Mariners', ... ]
     """
     resp = []
-    link = 'http://www.oddsportal.com/baseball/usa/mlb/'
+    link = 'https://www.oddsportal.com/baseball/usa/mlb/'
     r = requests.get(link)
     if r.status_code != 200:
         print('results page status code is {}'.format(r.status_code))
@@ -345,5 +370,5 @@ if __name__ == '__main__':
     # modl_list = dict(sport='baseball', country='usa', league='mlb', season='2015')
     # modl_list = dict(sport='baseball', country='japan', league='npb', season='2015')
     diapazon = range(1, 50)
-    resp = get_table(modl_list, '2015-2016', diapazon)
+    resp = get_table(modl_list, '2018-2019', diapazon)
     print(resp)

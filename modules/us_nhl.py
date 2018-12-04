@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append("C:/Users/qm69/Code/pyodds/libs")
+sys.path.append("C:/Users/khex/Code/pyodds/libs")
 
 from mongodb import modules
 from mongodb import teams

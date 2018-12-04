@@ -1,26 +1,30 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
 Odds portal scraper
 
 Usage:
-    statist.py <league> <teams>
-    statist.py -d | --debug
-    statist.py -v | --version
-    statist.py -h | --help
+    tabler.py <league> <teams>
+    tabler.py -d | --debug
+    tabler.py -v | --version
+    tabler.py -h | --help
 
 Options:
+    python tabler.py nba "Los Angeles Lakers - Phoenix Suns"
     -d --debug          Show debug messages.
     -h --help           Show this screen.
     -v --version        Show version.
 """
-
 from docopt import docopt
 from termcolor import colored
 from termcolor import cprint
 from pymongo import MongoClient
 
+""" TODO
+      [ ] limit MongoFind by arg params
+      [ ] filter MongoDB by season or date $gt: date(1, 1, 2018)
+"""
 
 MONGODB_URI = "mongodb://stavros:balalajka7@ds057934.mongolab.com:57934/deltabase"
 client = MongoClient(MONGODB_URI)
@@ -28,61 +32,58 @@ db = client.get_default_database()
 
 args = docopt(__doc__, version='0.0.1')
 league = args['<league>']
-
-# home_team, away_team = args['<teams>'].split(' - ')
-team_list = args['<teams>'].split(' - ')
-home_team, away_team = team_list
-
-
-def painter(spot, match):
-    """
-    Возвращает подкрашеную строку текста.
-
-    :param spot: 'home' or 'away'
-    :param match: Match data Dictionary
-    :return: returns string
-    """
-    line = match[spot]['ftot']['delta'][0]
-    hand = match[spot]['ftot']['delta'][1]
-    totl = match[spot]['ftot']['delta'][2]
-    itot = match[spot]['ftot']['delta'][3]
-
-    tmpl = '{:>4} {:>5} {:<14} {:<14} {:<14} {:<14}'
-    text = tmpl.format(
-        match['date']['date'],
-        spot,
-        # добавить белый для 0.5 и -0.5
-        colored(' ' + str(line) if line > 0 else str(line), 'magenta' if line > 0 else 'red'),
-        colored(' ' + str(hand) if hand > 0 else str(hand), 'magenta' if hand > 0 else 'red'),
-        colored(' ' + str(totl) if totl > 0 else str(totl), 'magenta' if totl > 0 else 'red'),
-        colored(' ' + str(itot) if itot > 0 else str(itot), 'magenta' if itot > 0 else 'red'))
-
-    return(text)
+home_team, away_team = args['<teams>'].split(' - ')
 
 
 def monger(tean_name):
-    """
-    Get match data from database.
-
-    :param tean_name: ex. 'Seattle Mariners'
-    :return: returns string
+    """ Get match data from database.
+        @param  {tean_name: string } - ex. 'Seattle Mariners'.
+        @return {match_list: string} - list of resalts.
     """
     team_dict = [{'home.team': tean_name}, {'away.team': tean_name}]
     query = {'league': league, 'seas_type': 'season', '$or': team_dict}
-    match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(12)
+    match_list = db.matches.find(query).sort([('date.iso', -1)]) # .limit(20) ???
     return list(match_list)
 
-home_list = monger(home_team)
-away_list = monger(away_team)
-longest = max(len(home_list), len(away_list))
-cprint(' {:^45}|{:^44}'.format(home_team, away_team), 'blue', 'on_white')
 
-for i in range(longest):
-    host_spot = 'home' if home_list[i]['home']['team'] == home_team else 'away'
-    gest_spot = 'home' if away_list[i]['home']['team'] == away_team else 'away'
+def painter(spot, match):
+    """ Возвращает подкрашеную строку текста.
+        @param  {spot: string} - 'home' or 'away'.
+        @param  {match: dict} - match data dictionary.
+        @return {line: string} - colored line for table.
+    """
+    arry = [match[spot]['ftot']['delta'][n] for n in range(4)]
+    # line, hand, totl, itot 
+    l, h, t, i = [colored(' ' + str(x) if x > 0 else str(x), 'magenta' if x > 0 else 'red') for x in arry]
+    tmpl = '{:>4} {:>5} {:<14} {:<14} {:<14} {:<14}'
+    line = tmpl.format(match['date']['date'], spot, l, h, t, i)
+    return(line)
 
-    host_text = painter(host_spot, home_list[i])
-    gest_text = painter(gest_spot, away_list[i])
 
-    line_tmpl = '  {}. {} | {}. {}'.format(i + 1, host_text, i + 1, gest_text)
-    print(line_tmpl)
+def printer(home_arry, away_arry, home_name, away_name):
+    """ Description.
+    @param  {home_arry, away_arry: list} - list of games.
+    @param  {home_name, away_name: string} - name of the team.
+    @param  {away_arry: list} - list of games.
+    """
+    cprint(' {:^45}|{:^44}'.format(home_name, away_name), 'blue', 'on_white')
+    shortest = min(len(home_arry), len(away_arry))
+    for i in range(shortest):
+        host_spot = 'home' if home_arry[i]['home']['team'] == home_team else 'away'
+        gest_spot = 'home' if away_arry[i]['home']['team'] == away_team else 'away'
+
+        host_text = painter(host_spot, home_arry[i])
+        gest_text = painter(gest_spot, away_arry[i])
+
+        print('  {}. {} | {}. {}'.format(i + 1, host_text, i + 1, gest_text))
+
+
+"""  Slice 12 games from list  """
+home_list = monger(home_team)[:12]
+away_list = monger(away_team)[:12]
+printer(home_list, away_list, home_team, away_team)
+
+"""  Filter only home games for home_team & away games for away_team  """
+home_mist = list(filter(lambda t: t['home']['team'] == home_team, home_list))
+away_mist = list(filter(lambda t: t['away']['team'] == away_team, away_list))
+printer(home_mist, away_mist, 'Home', 'Away')

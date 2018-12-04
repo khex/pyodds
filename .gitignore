@@ -1,5 +1,11 @@
 *.pyc
-*.log
 *.ipynb
-lib/*.pyc
-getters/.ipynb_checkpoints
+libs/__pycache__
+
+# iPython
+ipython/.ipynb_checkpoints
+ipython/*.ipynb
+
+# log files
+delta.log
+*.log

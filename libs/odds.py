@@ -2,22 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append('C:/Users/qm69/Code/pyodds/libs')
+sys.path.append('C:/Users/khex/Code/pyodds/libs')
 
 import ujson
 import requests
 # import multiprocessing as mp
 from statistics import mean
 from logger import log_odds
+""" @doc-bug: MLB если pre-season и нет данніх линии - еррор """
+""" Для каждого вида спорта отдельно
+    home_away  -> get_page -> map_close -> get_odds  > asian_handy -> get_page -> map_close  >
+    /  home_away -> get_page -> map_close /
 """
-@doc-bug: MLB если pre-season и нет данніх линии - еррор
-"""
-"""  Для каждого вида спорта отдельно
-         \  home_away  -> get_page -> map_close \
-get_odds  > asian_handy -> get_page -> map_close  >
-         /  home_away -> get_page -> map_close /
-"""
-
 
 def get_page(pref, xeid, xhash, value):
     """
@@ -40,7 +36,11 @@ def get_page(pref, xeid, xhash, value):
         domain = 'http://fb.oddsportal.com/feed/match'
         link_text = '{}/{}-{}-{}-{}.dat'
         link = link_text.format(domain, pref, xeid, value, xhash)
-        r = requests.get(link)  # .encoding = 'ISO-8859-1'
+        headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
+            'referer': 'https://www.oddsportal.com/basketball/usa/nba/philadelphia-76ers-dallas-mavericks-fL8bbADr/'
+        }
+        r = requests.get(link, headers=headers)  # r.encoding = 'ISO-8859-1'
         if r.status_code != 200:
             raise('results page status code is {}'.format(r.status_code))
 
@@ -346,6 +346,9 @@ def itot_base(line, total):
         return 5.5 if line < 2 else 4.5
     elif total == 11.5:
         return 6.5 if line < 1.4 else 5.5 if line < 1.75 else 4.5
+    elif total == 12.5:
+        # переделать, взято из предыдущего
+        return 7.5 if line < 1.4 else 6.5 if line < 1.75 else 5.5
     else:
         raise BaseException('Baseball total: {}'.format(total))
 

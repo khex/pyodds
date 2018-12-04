@@ -59,11 +59,11 @@ LOGGER = {
 
 logging.config.dictConfig(LOGGER)
 
-log_main = logging.getLogger('main')
+log_main   = logging.getLogger('main')
 log_tabler = logging.getLogger('tabler')
-log_odds = logging.getLogger('odds')
-log_build = logging.getLogger('build')
-log_db = logging.getLogger('db')
+log_odds   = logging.getLogger('odds')
+log_build  = logging.getLogger('build')
+log_db     = logging.getLogger('db')
 
 if __name__ == '__main__':
     #   main
