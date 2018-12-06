@@ -8,7 +8,7 @@ import json
 import pprint
 import requests
 from bs4 import BeautifulSoup
-from mongodb import teams
+# from mongodb import teams
 from mongodb import matches
 from odds import get_odds
 from builder import Match
@@ -113,7 +113,6 @@ def get_table(meta, meta_seas, diapz):
                 # 'center nob-border' Season data
                 if clss == 'center nob-border':
                     game_type = tag.find('th').text[:-3].strip()
-                    print(game_type)
                     if game_type == '- Play Offs12B':
                         seas_type = 'play-offs'
                     elif game_type == '- Pre-season12B':
@@ -141,8 +140,14 @@ def get_table(meta, meta_seas, diapz):
                     if matches.find_xeid(match['xeid']):
                         log_tabler.info('{} match in Base'.format(match['xeid']))
                         # Оператор continue начинает следующий проход цикла,
-                        # минуя оставшееся тело цикла (for или while)
+                        # минуя оставшееся тело цикла (for_или while)
                         continue
+
+
+                    """
+                       EXPORT HERE !!!
+                       decode on scraper func
+                    """
 
                     decoded = rowler(tag.contents)
                     # проверить окончен ли матч
@@ -170,13 +175,5 @@ def get_table(meta, meta_seas, diapz):
                     pass
 
             print('Page done.')
+
     return('Well Done')
-
-
-if __name__ == '__main__':
-    modl_list = dict(sport='hockey', country='usa', league='nhl', season='2015-2016')
-    # modl_list = dict(sport='baseball', country='usa', league='mlb', season='2015')
-    # modl_list = dict(sport='baseball', country='japan', league='npb', season='2015')
-    diapazon = range(1, 50)
-    resp = get_table(modl_list, '2018-2019', diapazon)
-    print(resp)

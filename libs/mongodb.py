@@ -5,6 +5,8 @@
 cd 'C:/env/mongodb/'
 bin/mongod.exe --config mongodb.conf
 """
+import sys
+sys.path.append('C:/Users/khex/Code/pyodds/libs')
 
 from pymongo import MongoClient
 # import pymongo, bson

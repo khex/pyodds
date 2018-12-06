@@ -16,6 +16,9 @@ Options:
     -h --help           Show this screen.
     -v --version        Show version.
 """
+import sys
+sys.path.append('C:/Users/khex/Code/pyodds/libs')
+
 from docopt import docopt
 from termcolor import colored
 from termcolor import cprint

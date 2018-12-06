@@ -18,12 +18,20 @@ Options:
     -h --help         Show this screen.
     -v --version      Show version.
 """
-
+import json
+import pprint
+import requests
 from docopt import docopt
-from libs.tabler import get_table
+from bs4 import BeautifulSoup
+# from mongodb import teams
+# from libs.tabler import get_table
+from libs.mongodb import matches
+from libs.odds import get_odds
+from libs.builder import Match
 from libs.rowler import rowler
 from libs.xhasher import xhasher
 from libs.logger import log_main
+from libs.logger import log_tabler
 
 data = {
     'mlb': dict(sport='baseball',   country='usa',   league='mlb',    season='2018'),
@@ -40,14 +48,133 @@ seas = args['<seas>'] or meta['season']
 first = 1 if args['<fpage>'] is None else int(args['<fpage>'])
 last = 60 if args['<lpage>'] is None else int(args['<lpage>'])
 
-"""   SCRAP RESULTS PAGE   """
-diapazon = range(first, last)
+# inform on screen about pagination numbers.
 text = 'Start seas {} from {} to {} page'
 log_main.info(text.format(seas, first, last))
 
-"""  DO SMTH  """
-tags_list = get_table(meta, seas, diapazon)
+user_agnt = 'Mozilla/5.0 (Windows NT 6.1) ' +\
+            'AppleWebKit/537.36 (KHTML, like Gecko) ' +\
+            'Chrome/70.0.3538.110 Safari/537.36'
 
+for page_numb in range(first, last):
+    """ write smth about 
+    """
+    tmpl_template = 'https://www.oddsportal.com/{}/{}/{}{}/results/#/page/{}/'
+    # current .../usa/nba/... or .../usa/nba-2016-2017/...
+    seas_tmpl = '' if seas in ['2018', '2018-2019'] else '-' + seas
+    link = tmpl_template.format(meta['sport'], meta['country'], meta['league'], seas_tmpl, page_numb)
+    print('line 65:', link)
+
+    r = requests.get(link, headers={'User-Agent': user_agnt})
+
+    if r.status_code != 200:
+        print('results page status code is {}'.format(r.status_code))
+        sys.exit()
+
+    r.encoding = 'ISO-8859-1'
+    r_string = str(r.content)
+
+    # get some needbe data
+    starts = r_string.find('var page = new PageTournament') + 30
+    finish = r_string.find(');var menu_open')
+    params = json.loads(r_string[starts:finish])
+
+    # Что это за ссылка ???
+    ajax_tmpl = 'https://fb.oddsportal.com/ajax-sport-country-tournament-archive/{}/{}/X0/1/3/{}?_=1543761020036'
+    ajax_link = ajax_tmpl.format(params['sid'], params['id'], page_numb)
+    print('line 84:', ajax_link)
+
+    # request for 'r', 'q', 's', 't'
+    q = requests.get(ajax_link, headers={
+        'User-Agent': user_agnt,
+        # make link to match dynamicaly
+        'referer': 'https://www.oddsportal.com/basketball/usa/nba/philadelphia-76ers-dallas-mavericks-fL8bbADr/'})
+
+    if q.status_code != 200:
+        print('results page status code is {}'.format(q.status_code))
+        sys.exit()
+
+    q.encoding = 'ISO-8859-1'
+    q_string = str(q.content)
+    starts = q_string.find('html')
+    raw_text = q_string[starts + 7:-19].replace('\\\\/', '/').replace('\\\\"', '"')   
+    soup = BeautifulSoup(raw_text, "lxml-xml")
+
+
+
+    """ BeautifulSoup """
+    if soup.find(id='tournamentTable').find(class_='cms'):
+        """ partials/no_data.py """
+        log_tabler.error('Page haven\'t resalts table')
+    else:
+        soup_list = soup.find('table').find_all('tr')
+
+        # why slise ???
+        for tag in soup_list[1:]:
+            clss = tag.get('class')
+
+            # 'center nob-border' Season data
+            if clss == 'center nob-border':
+                game_type = tag.find('th').text[:-3].strip()
+                if game_type == '- Play Offs12B':
+                    seas_type = 'play-offs'
+                elif game_type == '- Pre-season12B':
+                    seas_type = 'pre-season'
+                elif game_type == '- Wild Card12B':
+                    seas_type = 'wild-card'
+                elif game_type == '- All Stars12B':
+                    seas_type = 'all-stars'
+                elif game_type == '12B' or game_type == '1X2B':
+                    seas_type = 'season'
+                else:
+                    raise BaseException('Undefined season type')
+
+            # 'odd deactivate', ' deactivate'
+            elif clss == ' deactivate' or clss == 'odd deactivate':
+
+                match = {}
+                match['meta'] = meta
+                match['meta']['seas_type'] = seas_type
+
+                match['xeid'] = str(tag.get('xeid'))
+
+                # проверить наличие матча в базе
+                # 2015-06-23 20:57:16,971 INFO tabler 40wRuQtg match in Base
+                if matches.find_xeid(match['xeid']):
+                    log_tabler.info('{} match in Base'.format(match['xeid']))
+                    # Оператор continue начинает следующий проход цикла,
+                    # минуя оставшееся тело цикла (for_или while)
+                    continue
+
+
+                decoded = rowler(tag.contents)
+                # проверить окончен ли матч
+                if type(decoded) is str:
+                    log_tabler.info(decoded)
+                    continue
+
+                match.update(decoded)
+                xhash_score = xhasher(match['link'], meta['sport'])
+                match.update(xhash_score)
+                
+                print( meta['sport'], match['xeid'], match['xhash'] )
+
+                match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'] )
+
+                pp = pprint.PrettyPrinter(indent=2)
+                pp.pprint(match)
+                
+                m = Match(match)
+
+                resp = matches.save_one(m)
+                print(resp, '\n')
+
+            else:
+                pass
+
+        print('Page done.')
+
+"""
 # if tags_list is not None:
 if tags_list:
     print('\n\n\n if tag list \n\n\n')
@@ -66,3 +193,13 @@ if tags_list:
         else:
             match = rowler(bs4_tag)
             print('\n\n\n match = rowler(bs4_tag) \n\n\n')
+"""
+
+# from libs/tabler
+if __name__ == '__main__':
+    modl_list = dict(sport='hockey', country='usa', league='nhl', season='2015-2016')
+    # modl_list = dict(sport='baseball', country='usa', league='mlb', season='2015')
+    # modl_list = dict(sport='baseball', country='japan', league='npb', season='2015')
+    diapazon = range(1, 50)
+    resp = get_table(modl_list, '2018-2019', diapazon)
+    print(resp)

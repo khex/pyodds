@@ -5,9 +5,13 @@ import datetime
 from mongodb import teams
 from logger import log_tabler
 
+""" TODO
+      [ ] rewrite line 73  - teams cheking
+"""
 
 def rowler(t_data):
-    """ Парсит рядки из таблицы результатов из 'bs4_html_tag' в словарь
+    # print(t_data)
+    """ Parse BS tags from 'bs4_html_tag' data into the dictionary.
 
         Arguments:
             t_data @ list of bs4 html tags: [
@@ -30,14 +34,15 @@ def rowler(t_data):
         resp_dict = dict(date={}, link='', teams=[])
 
         """ get match link """
+        print(t_data[1])
         resp_dict['link'] = str(t_data[1].find('a').get('href'))
         print(resp_dict['link'])
         """ partials/match_types.html
-            Матч окончился 'счет:счет' либо отменен:
+            Match finished 'score:score' or match was canceled:
             - ret.   > Retired
             - postr. > Postponed
             - canc.  > Canceled
-            - abn.   > Abandoned
+            - abn.   > Abandoned 
         """
         result = t_data[2].text
         if ':' not in result:
@@ -62,7 +67,7 @@ def rowler(t_data):
         # </a>
         resp_dict['teams'] = str(t_data[1].find('a').text.replace("\\'", "'")).split(' - ')
 
-        # проверить наличие команды в БД и выкинуть ошипку
+        # check teams in DB and throw an ERROR
         resp_dict['tids'] = [0, 0]
         home = teams.find_one(resp_dict['teams'][0])
         away = teams.find_one(resp_dict['teams'][1])
@@ -77,7 +82,6 @@ def rowler(t_data):
         else:
             raise Exception('\n\nTeam \'{}\' is not in DB\n'.format(resp_dict['teams'][1]))
 
-        print(resp_dict)
         return resp_dict
 
     except Exception:
