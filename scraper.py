@@ -21,16 +21,12 @@ Options:
 
 from docopt import docopt
 from libs.tabler import get_table
-from libs.tabler import rows_to_dict
+from libs.rowler import rowler
 from libs.tabler import get_xhash_score
 from libs.logger import log_main
 
-# пока мало модулей, то их не выгодно тянуть из базы, разве что потом попробовать 'pickel'
-shot = ['2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011',
-        '2010', '2009', '2008', '2007', '2006']
-leng = ['2018-2019', '2017-2018','2016-2017','2015-2016', '2014-2015',
-        '2013-2014', '2012-2013', '2011-2012', '2010-2011', '2009-2010',
-        '2008-2009', '2007-2008', '2006-2007', '2005-2006']
+shot = ['2018']
+leng = ['2018-2019']
 
 data = {
     'mlb': dict(sport='baseball',   country='usa',   league='mlb',    seas_list=shot),
@@ -43,8 +39,6 @@ leag = args['<leag>']
 meta = data[leag]
 # get first value from 'seas_list'
 seas = args['<seas>'] or meta['seas_list'][0]
-
-
 
 # if first and last page was not defined
 # create it like 1 and 50
@@ -83,5 +77,5 @@ if tags_list:
         #   match from tags   #
         #######################
         else:
-            match = rows_to_dict(bs4_tag)
-            print('\n\n\n match = rows_to_dict(bs4_tag) \n\n\n')
+            match = rowler(bs4_tag)
+            print('\n\n\n match = rowler(bs4_tag) \n\n\n')
