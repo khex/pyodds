@@ -5,6 +5,7 @@ import datetime
 from mongodb import teams
 from logger import log_tabler
 
+
 def rowler(t_data):
     """ Парсит рядки из таблицы результатов из 'bs4_html_tag' в словарь
 
