@@ -8,8 +8,9 @@ from logger import log_tabler
 
 
 def xhasher(arg_url, sport):
-    """ Идет на страницу матча, вырезает 'xhash'
-        и парсит развернутые результати
+    """ Goes to match results page,
+        cut the 'xhash' value and
+        parce detailed results data
 
         Arguments:
             match_url '/basketball/usa/ ... -miami-heat-67Upolsm/'
@@ -35,8 +36,7 @@ def xhasher(arg_url, sport):
         p.encoding = 'ISO-8859-1'
         raw_text = str(p.content)
 
-        """ xhash, xhashf <- нужен ли? """
-        # возмодно нужно в JSON как в tabler ?
+        # xhash, xhashf <- do I need it?
         frst = raw_text.find('xhash') + 8
         last = raw_text.find('xhashf') - 3
         # first hash temp var
@@ -45,12 +45,12 @@ def xhasher(arg_url, sport):
 
         resp_dict['xhash'] = xhash
 
-        """ score 'partials/match_score.html'  """
+        # score 'partials/match_score.html'
         soup = BeautifulSoup(p.content, 'lxml')
         html = soup.find(id='event-status')
         text = html.text.replace(u'\xa0', u' ')
 
-        #  <p class="result">
+        # <p class="result">
         mtch_rslt = html.find('p').get('class')[0]
         score = resp_dict['score']
         if sport == 'basketball':

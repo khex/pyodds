@@ -40,7 +40,7 @@ home_team, away_team = args['<teams>'].split(' - ')
 
 def monger(tean_name):
     """ Get matches from database.
-        :param  tean_name: string  - ex. 'Seattle Mariners'.
+        :params tean_name: string  - ex. 'Seattle Mariners'.
         :return match_list: string - list of resalts.
     """
     team_dict = [{'home.team': tean_name}, {'away.team': tean_name}]
@@ -51,8 +51,8 @@ def monger(tean_name):
 
 def painter(spot, match):
     """ Color text string.
-        :param  spot: string - 'home' or 'away'.
-        :param  match: dict  - match data dictionary.
+        :params spot: string - 'home' or 'away'.
+        :params match: dict  - match data dictionary.
         :return line: string - colored line for table.
     """
     arry = [match[spot]['ftot']['delta'][n] for n in range(4)]
@@ -65,9 +65,9 @@ def painter(spot, match):
 
 def printer(home_arry, away_arry, home_name, away_name):
     """ Print colored lines.
-    :param  home_arry, away_arry: list - list of games.
-    :param  home_name, away_name: string - name of the team.
-    :param  away_arry: list - list of games.
+    :params home_arry, away_arry: list - list of games.
+    :params home_name, away_name: string - name of the team.
+    :params away_arry: list - list of games.
     """
     cprint(' {:^45}|{:^44}'.format(home_name, away_name), 'blue', 'on_white')
     shortest = min(len(home_arry), len(away_arry))

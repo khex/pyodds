@@ -23,8 +23,7 @@ import pprint
 import requests
 from docopt import docopt
 from bs4 import BeautifulSoup
-# from mongodb import teams
-# from libs.tabler import get_table
+
 from libs.mongodb import matches
 from libs.odds import get_odds
 from libs.builder import Match
@@ -80,7 +79,8 @@ for page_numb in range(first, last):
     params = json.loads(r_string[starts:finish])
 
     # Что это за ссылка ???
-    ajax_tmpl = 'https://fb.oddsportal.com/ajax-sport-country-tournament-archive/{}/{}/X0/1/3/{}?_=1543761020036'
+    ajax_tmpl = 'https://fb.oddsportal.com/ajax-sport-country-' +\
+                'tournament-archive/{}/{}/X0/1/3/{}?_=1543761020036'
     ajax_link = ajax_tmpl.format(params['sid'], params['id'], page_numb)
     print('line 84:', ajax_link)
 
@@ -88,7 +88,8 @@ for page_numb in range(first, last):
     q = requests.get(ajax_link, headers={
         'User-Agent': user_agnt,
         # make link to match dynamicaly
-        'referer': 'https://www.oddsportal.com/basketball/usa/nba/philadelphia-76ers-dallas-mavericks-fL8bbADr/'})
+        'referer': 'https://www.oddsportal.com/basketball/usa/nba/'+\
+                   'philadelphia-76ers-dallas-mavericks-fL8bbADr/'})
 
     if q.status_code != 200:
         print('results page status code is {}'.format(q.status_code))

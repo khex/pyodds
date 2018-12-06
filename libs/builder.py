@@ -127,7 +127,7 @@ class Match(UserDict):
         self['xeid'] = dd['xeid']
         self['date'] = dd['date']
         self['score'] = dd['score']
-        self['odds'] = dd['odds']  # может в каждую команду отдельно???
+        self['odds'] = dd['odds']
 
         # self['date']['scraptime'] = datetime.now().strftime('%y-%m-%d %H:%M')
         self['date']['scraptime'] = datetime.datetime.utcnow()
@@ -173,13 +173,9 @@ class Match(UserDict):
         """
 
     def count_result(self, schet, odds):
-
-        """ Возвращает результат в очках для каждой команды
-
-            Arguments:
-                score @ str: '90:100'
-
-            Return: [ [1.5, 14, 210, 112], [-1.5, -14, 210, 98]]
+        """ Return resalts in games for every team
+            :params score: string - '90:100'
+            :return :list - [[1.5, 14, 210, 112], [-1.5, -14, 210, 98]]
         """
         global odds_value
         score = [float(s) for s in schet.split(':')]  # [90, 100]
@@ -201,24 +197,14 @@ class Match(UserDict):
         total = float(sum(score))
 
         return [[reslt[n], handy[n], total, score[n]] for n in range(0, 2)]
-        """
-        return [[reslt[0], handy[0], total, score[0]],
-                [reslt[1], handy[1], total, score[1]]]
-        except Exception:
-            log_db.exception('From count_totl')
-        """
 
     def count_line(self, score, odds, once_scrd):
         global odds_value
-        """ Подсчет дельты и прибыли матча & профит:
-
-            Arguments:
-                score: [90, 100]
-                odds: [1.54, 2.25]
-                once_scrd: [[1.5, 14, 210, 112], [-1.5, -14, 210, 98]]
-
-            Return:
-                [[1, 54], [-1, -100]]
+        """ Cound deltas and profit of the match 
+        :params score: list - [90, 100]
+        :params odds: list - [1.54, 2.25]
+        :params once_scrd: list - [[1.5, 14, 210, 112], [-1.5, -14, 210, 98]]
+        :return : list - [[1, 54], [-1, -100]]
         """
         delta, profit = [], []
 
@@ -237,30 +223,26 @@ class Match(UserDict):
         elif once == [-3.5, 3.5]:
             delta = [-4.5, 4.5]
         else:
-            raise BaseException('Hernja s deltoj')
+            raise BaseException('Shity delta data.')
 
-        # подсчет прибыли
+        # profit counting
         if score[0] > score[1]:
             profit = [int((odds['mean'][0] - 1) * 100), -100]
         else:
             profit = [-100, int((odds['mean'][1] - 1) * 100)]
 
-        # odds_val из глобальной переменной
+        # odds_val from global variable
         return [delta, profit, odds_value]
 
     def count_handy(self, score, handy):
-        # print(score, handy)
-        """
-        Считает дельту по форе & профит:
-        Return:
-            (7.5, -7.5)
+        """ Count delta of handyCap and profit
         """
         delta = [
             self['home']['ftot']['resalt'][1] + handy['value'][0],
             self['away']['ftot']['resalt'][1] + handy['value'][1]
         ]
 
-        # подсчет прибыли
+        # profit counting
         if delta[0] > delta[1]:
             profit = [int((handy['mean'][0] - 1) * 100), -100]
         else:
@@ -269,13 +251,14 @@ class Match(UserDict):
         return [delta, profit, handy['value']]
 
     def count_total(self, score, total):
-        """ Считатет дельту тотала & профит """
+        """ Cound delta of total and profit
+        """
         if total['value'] == [0, 0]:
             return [[0, 0], [0, 0]]
 
         delta = self['home']['ftot']['resalt'][2] - total['value'][0]
 
-        # подсчет прибыли
+        # profit counting
         if delta > 0:
             profit = int((total['mean'][0] - 1) * 100)
         else:
@@ -284,7 +267,8 @@ class Match(UserDict):
         return [[delta, delta], [profit, profit], total['value']]
 
     def count_i_tot(self, score, itot):
-        """ Считатет инд. тотал & профит """
+        """ Count individual total and profit 
+        """
         if itot['value'] == [0, 0]:
             return [[0, 0], [0, 0]]
 
@@ -295,6 +279,7 @@ class Match(UserDict):
                   int((itot['mean'][1] - 1) * 100) if delta[1] > 0 else -100]
 
         return [delta, profit, itot['value']]
+
 
 if __name__ == '__main__':
     base = {

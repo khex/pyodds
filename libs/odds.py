@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+""" TODO
+      [ ] translate comments to english
+"""
 import sys
 sys.path.append('C:/Users/khex/Code/pyodds/libs')
 
