@@ -100,15 +100,11 @@ for page_numb in range(first, last):
     raw_text = q_string[starts + 7:-19].replace('\\\\/', '/').replace('\\\\"', '"')   
     soup = BeautifulSoup(raw_text, "lxml-xml")
 
-
-
-    """ BeautifulSoup """
+    """ BeautifulSoup Logic"""
     if soup.find(id='tournamentTable').find(class_='cms'):
-        """ partials/no_data.py """
         log_tabler.error('Page haven\'t resalts table')
     else:
         soup_list = soup.find('table').find_all('tr')
-
         # why slise ???
         for tag in soup_list[1:]:
             seas_type = ''
@@ -130,17 +126,12 @@ for page_numb in range(first, last):
                 else:
                     raise BaseException('Undefined season type')
 
+            # ' deactivate' and 'odd deactivate'
             elif clss == ' deactivate' or clss == 'odd deactivate':
-                match = {}
-                match['meta'] = meta
-                match['meta']['seas_type'] = seas_type
-
-                match['xeid'] = str(tag.get('xeid'))
-
-                # проверить наличие матча в базе
-                # 2015-06-23 20:57:16,971 INFO tabler 40wRuQtg match in Base
-                if matches.find_xeid(match['xeid']):
-                    log_tabler.info('{} match in Base'.format(match['xeid']))
+                xeid = str(tag.get('xeid'))
+                # find match in DB by xeid
+                if matches.find_xeid(xeid):
+                    log_tabler.info('{}: match in DB'.format(xeid))
                     # The continue statement rejects all the remaining statements
                     # in the current iteration of the loop and moves the control
                     # back to the top of the loop.
@@ -154,6 +145,10 @@ for page_numb in range(first, last):
                         continue
 
                     else:
+                        match = {}
+                        match['meta'] = meta
+                        match['meta']['seas_type'] = seas_type
+                        match['xeid'] = xeid
                         match.update(rows)
                         xhash_score = xhasher(match['link'], meta['sport'])
                         match.update(xhash_score)
@@ -170,13 +165,3 @@ for page_numb in range(first, last):
                 # pass dummy tag data not:
                 # 'center nob-border', ' deactivate' or 'odd deactivate'
                 pass
-
-
-# from libs/tabler
-if __name__ == '__main__':
-    modl_list = dict(sport='hockey', country='usa', league='nhl', season='2015-2016')
-    # modl_list = dict(sport='baseball', country='usa', league='mlb', season='2015')
-    # modl_list = dict(sport='baseball', country='japan', league='npb', season='2015')
-    diapazon = range(1, 50)
-    resp = get_table(modl_list, '2018-2019', diapazon)
-    print(resp)
