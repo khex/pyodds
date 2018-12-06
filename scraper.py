@@ -5,15 +5,15 @@
 Odds portal scraper
 
 Usage:
-    scraper.py <mhsh> <seas> [<fpage> <lpage>]
-    scraper.py <mhsh> <days>
+    scraper.py <leag> [<seas>] [<fpage> <lpage>]
     scraper.py -d | --debug
     scraper.py -v | --version
     scraper.py -h | --help
 
 Options:
-    python scraper.py bbusnb 2018-2019
-    python scraper.py bsusml 2016
+    python scraper.py nba
+    python scraper.py nba 2016-2017
+    python scraper.py mlb 2015
     -d --debug        Show debug messages.
     -h --help         Show this screen.
     -v --version      Show version.
@@ -26,22 +26,24 @@ from libs.tabler import get_xhash_score
 from libs.logger import log_main
 
 # пока мало модулей, то их не выгодно тянуть из базы, разве что потом попробовать 'pickel'
-shot = ['2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009', '2008', '2007', '2006']
-leng = ['2015-2016', '2014-2015', '2013-2014', '2012-2013', '2011-2012', '2010-2011',
-        '2009-2010', '2008-2009', '2007-2008', '2006-2007', '2005-2006']
+shot = ['2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011',
+        '2010', '2009', '2008', '2007', '2006']
+leng = ['2018-2019', '2017-2018','2016-2017','2015-2016', '2014-2015',
+        '2013-2014', '2012-2013', '2011-2012', '2010-2011', '2009-2010',
+        '2008-2009', '2007-2008', '2006-2007', '2005-2006']
 
-mhsh_dict = {
-    'bsusml': dict(sport='baseball', country='usa', league='mlb', seas_list=shot),
-    'bbitla': dict(sport='basketball', country='italy', league='lega-a', seas_list=leng),
-    'bbusnb': dict(sport='basketball', country='usa', league='nba', seas_list=leng),
-    'hkusnh': dict(sport='hockey', country='usa', league='nhl', seas_list=leng),
-}
+data = {
+    'mlb': dict(sport='baseball',   country='usa',   league='mlb',    seas_list=shot),
+    'lba': dict(sport='basketball', country='italy', league='lega-a', seas_list=leng),
+    'nba': dict(sport='basketball', country='usa',   league='nba',    seas_list=leng),
+    'nhl': dict(sport='hockey',     country='usa',   league='nhl',    seas_list=leng)}
 
-""" Посылает массив из годов, зачем ? """
-args = docopt(__doc__, version='0.5.221')
-season = args['<seas>']
-mhsh = args['<mhsh>']
-module = mhsh_dict[mhsh]
+args = docopt(__doc__, version='0.1')
+leag = args['<leag>']
+meta = data[leag]
+# get first value from 'seas_list'
+seas = args['<seas>'] or meta['seas_list'][0]
+
 
 
 # if first and last page was not defined
@@ -55,11 +57,11 @@ if last < first:
 
 """   SCRAP RESULTS PAGE   """
 diapazon = range(first, last)
-text = 'Start season {} from {} to {} page'
-log_main.info(text.format(season, first, last))
+text = 'Start seas {} from {} to {} page'
+log_main.info(text.format(seas, first, last))
 
 """  DO SMTH  """
-tags_list = get_table(module, season, diapazon)
+tags_list = get_table(meta, seas, diapazon)
 
 # if tags_list is not None:
 if tags_list:
