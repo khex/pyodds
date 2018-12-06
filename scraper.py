@@ -25,20 +25,17 @@ from libs.rowler import rowler
 from libs.tabler import get_xhash_score
 from libs.logger import log_main
 
-shot = ['2018']
-leng = ['2018-2019']
-
 data = {
-    'mlb': dict(sport='baseball',   country='usa',   league='mlb',    seas_list=shot),
-    'lba': dict(sport='basketball', country='italy', league='lega-a', seas_list=leng),
-    'nba': dict(sport='basketball', country='usa',   league='nba',    seas_list=leng),
-    'nhl': dict(sport='hockey',     country='usa',   league='nhl',    seas_list=leng)}
+    'mlb': dict(sport='baseball',   country='usa',   league='mlb',    season='2018'),
+    'lba': dict(sport='basketball', country='italy', league='lega-a', season='2018-2019'),
+    'nba': dict(sport='basketball', country='usa',   league='nba',    season='2018-2019'),
+    'nhl': dict(sport='hockey',     country='usa',   league='nhl',    season='2018-2019')}
 
 args = docopt(__doc__, version='0.1')
 leag = args['<leag>']
 meta = data[leag]
 # get first value from 'seas_list'
-seas = args['<seas>'] or meta['seas_list'][0]
+seas = args['<seas>'] or meta['season']
 
 # if first and last page was not defined
 # create it like 1 and 50
