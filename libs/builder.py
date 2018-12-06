@@ -249,7 +249,7 @@ class Match(UserDict):
         return [delta, profit, odds_value]
 
     def count_handy(self, score, handy):
-        print(score, handy)
+        # print(score, handy)
         """
         Считает дельту по форе & профит:
         Return:

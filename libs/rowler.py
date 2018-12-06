@@ -10,7 +10,6 @@ from logger import log_tabler
 """
 
 def rowler(t_data):
-    # print(t_data)
     """ Parse BS tags from 'bs4_html_tag' data into the dictionary.
 
         Arguments:
@@ -34,9 +33,7 @@ def rowler(t_data):
         resp_dict = dict(date={}, link='', teams=[])
 
         """ get match link """
-        print(t_data[1])
         resp_dict['link'] = str(t_data[1].find('a').get('href'))
-        print(resp_dict['link'])
         """ partials/match_types.html
             Match finished 'score:score' or match was canceled:
             - ret.   > Retired

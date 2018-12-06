@@ -111,6 +111,7 @@ for page_numb in range(first, last):
 
         # why slise ???
         for tag in soup_list[1:]:
+            seas_type = ''
             clss = tag.get('class')
 
             # 'center nob-border' Season data
@@ -129,9 +130,7 @@ for page_numb in range(first, last):
                 else:
                     raise BaseException('Undefined season type')
 
-            # 'odd deactivate', ' deactivate'
             elif clss == ' deactivate' or clss == 'odd deactivate':
-
                 match = {}
                 match['meta'] = meta
                 match['meta']['seas_type'] = seas_type
@@ -142,58 +141,36 @@ for page_numb in range(first, last):
                 # 2015-06-23 20:57:16,971 INFO tabler 40wRuQtg match in Base
                 if matches.find_xeid(match['xeid']):
                     log_tabler.info('{} match in Base'.format(match['xeid']))
-                    # Оператор continue начинает следующий проход цикла,
-                    # минуя оставшееся тело цикла (for_или while)
+                    # The continue statement rejects all the remaining statements
+                    # in the current iteration of the loop and moves the control
+                    # back to the top of the loop.
                     continue
 
+                else:
+                    rows = rowler(tag.contents)
+                    # check if match is finished.
+                    if type(rows) is str:
+                        log_tabler.info(rows)
+                        continue
 
-                decoded = rowler(tag.contents)
-                # проверить окончен ли матч
-                if type(decoded) is str:
-                    log_tabler.info(decoded)
-                    continue
+                    else:
+                        match.update(rows)
+                        xhash_score = xhasher(match['link'], meta['sport'])
+                        match.update(xhash_score)
+                        match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'] )
 
-                match.update(decoded)
-                xhash_score = xhasher(match['link'], meta['sport'])
-                match.update(xhash_score)
-                
-                print( meta['sport'], match['xeid'], match['xhash'] )
-
-                match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'] )
-
-                pp = pprint.PrettyPrinter(indent=2)
-                pp.pprint(match)
-                
-                m = Match(match)
-
-                resp = matches.save_one(m)
-                print(resp, '\n')
+                        pp = pprint.PrettyPrinter(indent=2)
+                        pp.pprint(match)
+                        
+                        m = Match(match)
+                        resp = matches.save_one(m)
+                        print(resp, '\n')
 
             else:
+                # pass dummy tag data not:
+                # 'center nob-border', ' deactivate' or 'odd deactivate'
                 pass
 
-        print('Page done.')
-
-"""
-# if tags_list is not None:
-if tags_list:
-    print('\n\n\n if tag list \n\n\n')
-
-    # row by rows
-    for y, tag_arr in enumerate(tags_list):
-        seas_type, xeid, bs4_tag = tag_arr
-        print('\n\n\n for y, tag_arr in enumerate(tags_list): \n\n\n')
-
-        # check xeid
-        xgxs = xhasher(xeid)
-        if xgxs is True:
-            print('Xeid: %s exist' % xeid)
-
-        # match from tags
-        else:
-            match = rowler(bs4_tag)
-            print('\n\n\n match = rowler(bs4_tag) \n\n\n')
-"""
 
 # from libs/tabler
 if __name__ == '__main__':

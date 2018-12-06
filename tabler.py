@@ -44,8 +44,8 @@ def monger(tean_name):
         :return match_list: string - list of resalts.
     """
     team_dict = [{'home.team': tean_name}, {'away.team': tean_name}]
-    query = {'league': league, 'seas_type': 'season', '$or': team_dict}
-    match_list = db.matches.find(query).sort([('date.iso', -1)]) # .limit(20) ???
+    query = {'league': league, 'seas_type': 'season', '$or': team_dict} # 'meta.season': '2018-2019'
+    match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(20)
     return list(match_list)
 
 
