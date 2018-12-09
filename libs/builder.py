@@ -6,6 +6,9 @@ from collections import UserDict
 # from logger import log_db
 odds_value = []
 
+""" TODO
+      [ ] upadate model
+"""
 
 class Match(UserDict):
     """docstring for Match @ ???
@@ -39,7 +42,6 @@ class Match(UserDict):
             "time": "03:00",
             "scraptime": {"$date": "2015-11-28T14:12:56.404Z"},
             "iso": {"$date": "2015-11-28T03:00:00.000Z"},
-
         },
         "away.ftot.delta"
         "away": {

@@ -43,9 +43,12 @@ def monger(tean_name):
         :params tean_name: string  - ex. 'Seattle Mariners'.
         :return match_list: string - list of resalts.
     """
-    team_dict = [{'home.team': tean_name}, {'away.team': tean_name}]
-    query = {'league': league, 'seas_type': 'season', '$or': team_dict} # 'meta.season': '2018-2019'
-    match_list = db.matches.find(query).sort([('date.iso', -1)]).limit(20)
+    query = {
+        'league': league,
+        'seas_type': 'season',
+        'seas_year': '2018-2019',
+        '$or': [{'home.team': tean_name}, {'away.team': tean_name}] }
+    match_list = db.matches.find(query).sort([('date.ts', -1)])  # .limit(30)
     return list(match_list)
 
 
@@ -82,8 +85,8 @@ def printer(home_arry, away_arry, home_name, away_name):
 
 
 """  Slice 12 games from list  """
-home_list = monger(home_team)[:12]
-away_list = monger(away_team)[:12]
+home_list = monger(home_team)
+away_list = monger(away_team)
 printer(home_list, away_list, home_team, away_team)
 
 """  Filter only home games for home_team & away games for away_team  """

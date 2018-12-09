@@ -18,6 +18,7 @@ Options:
     -h --help         Show this screen.
     -v --version      Show version.
 """
+import sys
 import json
 import pprint
 import requests
@@ -32,20 +33,25 @@ from libs.xhasher import xhasher
 from libs.logger import log_main
 from libs.logger import log_tabler
 
+""" TODO
+      [ ] add counter for matches in DB. if it > 5 than sys.exit()
+      [ ] seas_type >> 
+"""
+
 data = {
-    'mlb': dict(sport='baseball',   country='usa',   league='mlb',    season='2018'),
-    'lba': dict(sport='basketball', country='italy', league='lega-a', season='2018-2019'),
-    'nba': dict(sport='basketball', country='usa',   league='nba',    season='2018-2019'),
-    'nhl': dict(sport='hockey',     country='usa',   league='nhl',    season='2018-2019')}
+    'mlb': dict(sport='baseball',   country='usa',   league='mlb',    seas_year='2018'),
+    'lba': dict(sport='basketball', country='italy', league='lega-a', seas_year='2018-2019'),
+    'nba': dict(sport='basketball', country='usa',   league='nba',    seas_year='2018-2019'),
+    'nhl': dict(sport='hockey',     country='usa',   league='nhl',    seas_year='2018-2019')}
 
 args = docopt(__doc__, version='0.1')
 leag = args['<leag>']
 meta = data[leag]
-seas = args['<seas>'] or meta['season']
+seas = args['<seas>'] or meta['seas_year']
 
 # if first and last page was not defined create it like 1 and 50
 first = 1 if args['<fpage>'] is None else int(args['<fpage>'])
-last = 60 if args['<lpage>'] is None else int(args['<lpage>'])
+last  = 99 if args['<lpage>'] is None else int(args['<lpage>'])
 
 # inform on screen about pagination numbers.
 text = 'Start seas {} from {} to {} page'
@@ -82,7 +88,6 @@ for page_numb in range(first, last):
     ajax_tmpl = 'https://fb.oddsportal.com/ajax-sport-country-' +\
                 'tournament-archive/{}/{}/X0/1/3/{}?_=1543761020036'
     ajax_link = ajax_tmpl.format(params['sid'], params['id'], page_numb)
-    print('line 84:', ajax_link)
 
     # request for 'r', 'q', 's', 't'
     q = requests.get(ajax_link, headers={
@@ -92,8 +97,7 @@ for page_numb in range(first, last):
                    'philadelphia-76ers-dallas-mavericks-fL8bbADr/'})
 
     if q.status_code != 200:
-        print('results page status code is {}'.format(q.status_code))
-        sys.exit()
+        sys.exit('EXIT: results page status code is {}'.format(q.status_code))
 
     q.encoding = 'ISO-8859-1'
     q_string = str(q.content)
@@ -103,15 +107,18 @@ for page_numb in range(first, last):
 
     """ BeautifulSoup Logic"""
     if soup.find(id='tournamentTable').find(class_='cms'):
-        log_tabler.error('Page haven\'t resalts table')
+        sys.exit('EXIT: page haven\'t resalts table.')
     else:
-        soup_list = soup.find('table').find_all('tr')
-        # why slise ???
-        for tag in soup_list[1:]:
-            seas_type = ''
+        seas_type = ''
+        # delete first row 'Basketball » USA » NBA'
+        soup_list = soup.find('table').find_all('tr')[1:]
+        for tag in soup_list:
+            # here are two kind of results table rows
+            #  - meta data with season type
+            #  - and rows with teams and score
             clss = tag.get('class')
-
-            # 'center nob-border' Season data
+            # <tr class="center nob-border">
+            # tabler row with meta data do define seas_type
             if clss == 'center nob-border':
                 game_type = tag.find('th').text[:-3].strip()
                 if game_type == '- Play Offs12B':
@@ -127,7 +134,8 @@ for page_numb in range(first, last):
                 else:
                     raise BaseException('Undefined season type')
 
-            # ' deactivate' and 'odd deactivate'
+            # <tr class="odd deactivate" xeid="IcGSKOQC">
+            # this row goes with game results
             elif clss == ' deactivate' or clss == 'odd deactivate':
                 xeid = str(tag.get('xeid'))
                 # find match in DB by xeid
