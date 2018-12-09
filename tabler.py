@@ -63,7 +63,7 @@ def painter(spot, match):
     arry = [match[spot]['ftot']['delta'][n] for n in range(4)]
     # line, hand, totl, itot 
     l, h, t, i = [colored(' ' + str(x) if x > 0 else str(x), 'magenta' if x > 0 else 'red') for x in arry]
-    tmpl = '{:>4} {:>5} {:<14} {:<14} {:<14} {:<14}'
+    tmpl = '{:<5} {:>5} {:<14} {:<14} {:<14} {:<14}'
     line = tmpl.format(match['date']['date'], spot, l, h, t, i)
     return(line)
 
@@ -83,7 +83,7 @@ def printer(home_arry, away_arry, home_name, away_name):
         host_text = painter(host_spot, home_arry[i])
         gest_text = painter(gest_spot, away_arry[i])
 
-        print('  {}. {} | {}. {}'.format(i + 1, host_text, i + 1, gest_text))
+        print('  {:>2}. {} | {:>2}. {}'.format(i + 1, host_text, i + 1, gest_text))
 
 
 """  Slice 12 games from list  """
