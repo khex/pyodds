@@ -5,13 +5,14 @@
 Odds portal scraper
 
 Usage:
-    tabler.py <league> <teams>
+    tabler.py <league> <teams> [<season>]
     tabler.py -d | --debug
     tabler.py -v | --version
     tabler.py -h | --help
 
 Options:
     python tabler.py nba "Los Angeles Lakers - Phoenix Suns"
+    python tabler.py nba "San Antonio Spurs - Utah Jazz" "2017-2018"
     -d --debug          Show debug messages.
     -h --help           Show this screen.
     -v --version        Show version.
@@ -36,6 +37,7 @@ db = client.get_default_database()
 args = docopt(__doc__, version='0.0.1')
 league = args['<league>']
 home_team, away_team = args['<teams>'].split(' - ')
+season = args['<season>'] or '2018-2019'
 
 
 def monger(tean_name):
@@ -46,7 +48,7 @@ def monger(tean_name):
     query = {
         'league': league,
         'seas_type': 'season',
-        'seas_year': '2018-2019',
+        'seas_year': season,
         '$or': [{'home.team': tean_name}, {'away.team': tean_name}] }
     match_list = db.matches.find(query).sort([('date.ts', -1)])  # .limit(30)
     return list(match_list)

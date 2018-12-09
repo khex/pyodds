@@ -5,7 +5,7 @@
 Odds portal scraper
 
 Usage:
-    scraper.py <leag> [<seas>] [<fpage> <lpage>]
+    scraper.py <league> [<season>] [<first> <last>]
     scraper.py -d | --debug
     scraper.py -v | --version
     scraper.py -h | --help
@@ -35,7 +35,7 @@ from libs.logger import log_tabler
 
 """ TODO
       [ ] add counter for matches in DB. if it > 5 than sys.exit()
-      [ ] seas_type >> 
+      [x] seas_type >> done @09/12/18_17:15 #maslo
 """
 
 data = {
@@ -45,13 +45,13 @@ data = {
     'nhl': dict(sport='hockey',     country='usa',   league='nhl',    seas_year='2018-2019')}
 
 args = docopt(__doc__, version='0.1')
-leag = args['<leag>']
+leag = args['<league>']
 meta = data[leag]
-seas = args['<seas>'] or meta['seas_year']
+seas = args['<season>'] or meta['seas_year']
 
 # if first and last page was not defined create it like 1 and 50
-first = 1 if args['<fpage>'] is None else int(args['<fpage>'])
-last  = 99 if args['<lpage>'] is None else int(args['<lpage>'])
+first = 1 if args['<first>'] is None else int(args['<first>'])
+last  = 99 if args['<last>'] is None else int(args['<last>'])
 
 # inform on screen about pagination numbers.
 text = 'Start seas {} from {} to {} page'
@@ -110,15 +110,13 @@ for page_numb in range(first, last):
         sys.exit('EXIT: page haven\'t resalts table.')
     else:
         seas_type = ''
-        # delete first row 'Basketball » USA » NBA'
+        # delete first row like 'Basketball » USA » NBA'
         soup_list = soup.find('table').find_all('tr')[1:]
         for tag in soup_list:
-            # here are two kind of results table rows
-            #  - meta data with season type
-            #  - and rows with teams and score
+            # there are two kind of results table rows
             clss = tag.get('class')
             # <tr class="center nob-border">
-            # tabler row with meta data do define seas_type
+            # tabler row with meta data to define seas_type
             if clss == 'center nob-border':
                 game_type = tag.find('th').text[:-3].strip()
                 if game_type == '- Play Offs12B':
@@ -136,7 +134,8 @@ for page_numb in range(first, last):
 
             # <tr class="odd deactivate" xeid="IcGSKOQC">
             # this row goes with game results
-            elif clss == ' deactivate' or clss == 'odd deactivate':
+            # elif clss == ' deactivate' or clss == 'odd deactivate':
+            else:
                 xeid = str(tag.get('xeid'))
                 # find match in DB by xeid
                 if matches.find_xeid(xeid):
@@ -157,6 +156,8 @@ for page_numb in range(first, last):
                         match = {}
                         match['meta'] = meta
                         match['meta']['seas_type'] = seas_type
+                        # rewrite 'seas_year' from meta data
+                        match['meta']['seas_year'] = seas
                         match['xeid'] = xeid
                         match.update(rows)
                         xhash_score = xhasher(match['link'], meta['sport'])
@@ -169,8 +170,3 @@ for page_numb in range(first, last):
                         m = Match(match)
                         resp = matches.save_one(m)
                         print(resp, '\n')
-
-            else:
-                # pass dummy tag data not:
-                # 'center nob-border', ' deactivate' or 'odd deactivate'
-                pass
