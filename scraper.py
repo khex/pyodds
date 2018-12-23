@@ -20,10 +20,12 @@ Options:
 """
 import sys
 import json
-import pprint
+# import pprint
 import requests
 from docopt import docopt
 from bs4 import BeautifulSoup
+
+from pprint import PrettyPrinter
 
 from libs.mongodb import matches
 from libs.odds import get_odds
@@ -36,6 +38,7 @@ from libs.logger import log_tabler
 """ TODO
       [ ] add counter for matches in DB. if it > 5 than sys.exit()
       [x] seas_type >> done @09/12/18_17:15 #maslo
+      [ ] pprint in libs/mongodb.py
 """
 
 data = {
@@ -134,8 +137,7 @@ for page_numb in range(first, last):
 
             # <tr class="odd deactivate" xeid="IcGSKOQC">
             # this row goes with game results
-            # elif clss == ' deactivate' or clss == 'odd deactivate':
-            else:
+            elif clss == ' deactivate' or clss == 'odd deactivate':
                 xeid = str(tag.get('xeid'))
                 # find match in DB by xeid
                 if matches.find_xeid(xeid):
@@ -156,17 +158,19 @@ for page_numb in range(first, last):
                         match = {}
                         match['meta'] = meta
                         match['meta']['seas_type'] = seas_type
-                        # rewrite 'seas_year' from meta data
                         match['meta']['seas_year'] = seas
                         match['xeid'] = xeid
                         match.update(rows)
-                        xhash_score = xhasher(match['link'], meta['sport'])
-                        match.update(xhash_score)
+                        match.update(xhasher(match['link'], meta['sport']))
                         match['odds'] = get_odds(meta['sport'], match['xeid'], match['xhash'] )
 
-                        pp = pprint.PrettyPrinter(indent=2)
+                        pp = PrettyPrinter(indent=2)
                         pp.pprint(match)
                         
                         m = Match(match)
                         resp = matches.save_one(m)
                         print(resp, '\n')
+            else:
+                # pass other empty rows
+                # <td/>, <td/>, <td/>, <td/>, <td/>, <td/>, <td/>
+                pass

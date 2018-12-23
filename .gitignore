@@ -1,10 +1,11 @@
 *.pyc
-*.ipynb
 libs/__pycache__
 
-# iPython
+# iPython temp files
 ipython/.ipynb_checkpoints
-ipython/*.ipynb
+ipython/quarantine/.ipynb_checkpoints
+jupiter/.ipynb_checkpoints
+jupiter/quarantine/.ipynb_checkpoints
 
 # log files
 delta.log

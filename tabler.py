@@ -28,6 +28,7 @@ from pymongo import MongoClient
 """ TODO
       [ ] limit MongoFind by arg params
       [ ] filter MongoDB by season or date $gt: date(1, 1, 2018)
+      [ ] add second header line with hCap, Totl, iTot
 """
 
 MONGODB_URI = "mongodb://stavros:balalajka7@ds057934.mongolab.com:57934/deltabase"
@@ -74,7 +75,8 @@ def printer(home_arry, away_arry, home_name, away_name):
     :params home_name, away_name: string - name of the team.
     :params away_arry: list - list of games.
     """
-    cprint(' {:^45}|{:^44}'.format(home_name, away_name), 'blue', 'on_white')
+    cprint('{:^47}|{:^47}'.format(home_name, away_name), 'blue', 'on_white')
+    # cprint('{:^47}|{:^47}'.format('date', 'hCap'), 'blue', 'on_white')
     shortest = min(len(home_arry), len(away_arry))
     for i in range(shortest):
         host_spot = 'home' if home_arry[i]['home']['team'] == home_team else 'away'

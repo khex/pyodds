@@ -13,7 +13,8 @@ for (var i = 0; i < asdf.length; i++) {
 };
 
 
-db.getCollection('matches').find({$or: [
+db.getCollection('matches')
+  .find({$or: [
     {'home.team': 'Houston Astros'},
     {'away.team': 'Houston Astros'}], 'seas_type': 'season'}).count();
     //).sort({'date.timestamp': -1}).count();
@@ -26,11 +27,3 @@ db.getCollection('matches')
     .find({'league': 'mlb', 'season': '2015', 'seas_type': 'season',
            '$or': [{'home.team': 'Texas Rangers'}, {'away.team': 'Texas Rangers'}]})
     .sort({'date.iso_date': 1})
-
-{
-    "date": "date.datetime",
-    "home": "home.team",
-    "h_dlt": "home.ftot.delta[0]",
-    "away": "away.team",
-    "a_dlt": "away.ftot.delta"
-}

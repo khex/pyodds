@@ -9,17 +9,19 @@ import matplotlib.collections as collections
 args = docopt(__doc__)
 print(args['<team_name>'])
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["delta_test"]
+MONGODB_URI = "mongodb://stavros:balalajka7@ds057934.mongolab.com:57934/deltabase"
+client = MongoClient(MONGODB_URI)
+db = client.get_default_database()
 
-name = "Texas Rangers"
-# sort([('date.iso', 1)]) от старших к новым ->
-match_list = db.matches.find({'league': 'mlb', 'season': '2015', 'seas_type': 'season',
-                              '$or': [{'home.team': name}, {'away.team': name}]}) \
-                       .sort([('date.iso', 1)])  # [30:]
+team = "Texas Rangers"
+seas = "2017-2018"
+
+query = {'league': 'nba', 'seas_year': seas, 'seas_type': 'season',
+         '$or': [{'home.team': team}, {'away.team': team}]}
+match_list = db.matches.find(query).sort([('date.iso', 1)])  # [30:]
 
 arry = [[[0.0] for n in range(3)] for m in range(4)]
-labels = ['Line', 'Asian Handycap', 'Total', 'Individ. Total']
+lbls = ['Line', 'Asian Handycap', 'Total', 'Individ. Total']
 
 # for match in match_list:
 #    print(match['date']['datetime'])
@@ -36,7 +38,7 @@ for match in match_list:
 for i in range(4):
     r = arry[i]
     fig, ax = plt.subplots(figsize=(17, 5))
-    ax.set_title(labels[i])
+    ax.set_title(lbls[i])
     X, d_Y = range(len(r[0])), np.array(r[2])
 
     ax.plot(X, r[0], color='green', label='Resalt')
