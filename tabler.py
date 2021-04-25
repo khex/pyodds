@@ -18,8 +18,8 @@ Options:
     -v --version        Show version.
 """
 import sys
-sys.path.append('C:/Users/khex/Code/pyodds/libs')
-
+#   path.append('C:/Users/khex/Code/pyodds/libs')
+sys.path.append('/home/khex/Code/pyodds/libs')
 from docopt import docopt
 from termcolor import colored
 from termcolor import cprint
@@ -32,13 +32,15 @@ from pymongo import MongoClient
 """
 
 MONGODB_URI = "mongodb://stavros:balalajka7@ds057934.mongolab.com:57934/deltabase"
-client = MongoClient(MONGODB_URI)
+MONGO_ATLAS = "mongodb+srv://stavros:balalajka7@cluster0.62wbu.mongodb.net/deltabase"
+
+client = MongoClient(MONGO_ATLAS)
 db = client.get_default_database()
 
 args = docopt(__doc__, version='0.0.1')
 league = args['<league>']
 home_team, away_team = args['<teams>'].split(' - ')
-season = args['<season>'] or '2018-2019'
+season = args['<season>'] or '2020-2021'
 
 
 def monger(tean_name):

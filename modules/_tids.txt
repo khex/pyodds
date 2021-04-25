@@ -3,5 +3,3 @@
 068 - 099  =>  bsuaml:  baseball    USA    MLB
 100 - 112  =>  bsjpnp:  baseball    Japan  NPB
 113 - 142  =>  hkusnh:  hockey      USA    NHL
-
-Empty: 66, 67

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append("C:/Users/khex/Code/pyodds/libs")
-
+#   path.append("C:/Users/khex/Code/pyodds/libs")
+sys.path.append('/home/khex/Code/pyodds/libs')
 from mongodb import modules
 from mongodb import teams
 
@@ -15,9 +15,24 @@ m_data = dict(
     odd_url=("basketball", "usa", "nba")
 )
 
-year = ['2018-2019', '2017-2018', '2016-2017', '2015-2016', '2014-2015',
-        '2013-2014', '2012-2013', '2011-2012', '2010-2011', '2009-2010',
-        '2008-2009', '2007-2008', '2006-2007', '2005-2006']
+year = [
+    '2020-2021',
+    '2019-2020',
+    '2018-2019',
+    '2017-2018',
+    '2016-2017',
+    '2015-2016',
+    '2014-2015',
+    '2013-2014',
+    '2012-2013',
+    '2011-2012',
+    '2010-2011',
+    '2009-2010',
+    '2008-2009',
+    '2007-2008',
+    '2006-2007',
+    '2005-2006'
+]
 
 team_dict = [
     dict(tid=1,  opid="xAO4gBas", full="Atlanta Hawks",          short="atlanta-hawks", seasons=year),
@@ -54,6 +69,8 @@ team_dict = [
     dict(tid=32, opid="",         full="West",                   short="West", seasons=year),
     dict(tid=33, opid="dxdenFmO", full="Team World",             short="team-world", seasons=year),
     dict(tid=34, opid="",         full="Team USA",               short="Team-USA", seasons=year),
+    dict(tid=66, opid="OzVM8037", full="Team Durant",            short="team-durant", seasons=year),
+    dict(tid=67, opid="UP6MJZ7R", full="Team LeBron",            short="team-lebron", seasons=year),
 ]
 
 

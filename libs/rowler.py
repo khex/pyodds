@@ -62,6 +62,7 @@ def rowler(t_data):
         # <a href="/basketball/italy/lega-a/capo-dorlando-milano-dzzJsnCt/">
         #     <span class="bold">Capo d'Orlando</span> - Milano
         # </a>
+
         resp_dict['teams'] = str(t_data[1].find('a').text.replace("\\'", "'")).split(' - ')
 
         # check teams in DB and throw an ERROR

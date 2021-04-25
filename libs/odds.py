@@ -5,7 +5,8 @@
       [ ] translate comments to english
 """
 import sys
-sys.path.append('C:/Users/khex/Code/pyodds/libs')
+#   path.append('C:/Users/khex/Code/pyodds/libs')
+sys.path.append('/home/khex/Code/pyodds/libs')
 
 import ujson
 import requests
@@ -74,6 +75,7 @@ def map_close(odds_arry):
         Return:
             [1.75, 1.91]
     """
+
     try:
         if type(list(odds_arry.values())[0]) is list:
             # odds -> list
@@ -82,11 +84,13 @@ def map_close(odds_arry):
 
         else:
             # odds -> dict
-            arry_home = [odds['0'] for odds in odds_arry.values()]
-            arry_away = [odds['1'] for odds in odds_arry.values()]
 
-        return [round(mean(arry_home), 2),
-                round(mean(arry_away), 2)]
+            arry_home = [odds['0'] for odds in odds_arry.values() if type(odds) is dict]
+            arry_away = [odds['1'] for odds in odds_arry.values() if type(odds) is dict]
+
+            
+
+        return [ round(mean(arry_home), 2), round(mean(arry_away), 2) ]
 
     except Exception:
         log_odds.exception('Can\'t map_close')
@@ -255,7 +259,7 @@ def over_under(pref, xeid, xhash, args_dict):
         Коэф. на Over/Under
 
         Arguments:
-            pref: '1-6' -> бейсбол
+            pref: '1-6' -> baseball
             xeid:  '67Upolsm'
             xhash: 'yj1b4'
             args_dict: dict(ftot='5-1', frst='5-3')
@@ -281,6 +285,7 @@ def over_under(pref, xeid, xhash, args_dict):
 
             odds_dict = get_page(pref, xeid, xhash, value)
 
+
             if odds_dict['close']:
                 for key, value in odds_dict['close'].items():
 
@@ -294,16 +299,21 @@ def over_under(pref, xeid, xhash, args_dict):
                         handy_value = temp_valu
 
                 resp_dict[period]['value'] = [handy_value, handy_value]
+
+
                 close_odds = map_close(odds_dict['close'][mtch_type]['odds'])
 
                 tids = tids if type(tids) is list else [tids['0'], tids['1']]
                 open_odds = map_open(odds_dict['history'], tids)
 
+
                 resp_dict[period]['close'] = close_odds
                 resp_dict[period]['open'] = open_odds
+
                 resp_dict[period]['mean'] = [
                     round(mean([close_odds[0], open_odds[0]]), 2),
-                    round(mean([close_odds[1], open_odds[1]]), 2)]
+                    round(mean([close_odds[1], open_odds[1]]), 2)
+                ]
                 """
                 print('value: {} mean: {} delta: {}, amount: {}'.format(
                     resp_dict[period]['value'][0],
@@ -315,8 +325,8 @@ def over_under(pref, xeid, xhash, args_dict):
             else:
                 resp_dict[period]['value'] = [0, 0]
                 resp_dict[period]['close'] = [0, 0]
-                resp_dict[period]['open'] = [0, 0]
-                resp_dict[period]['mean'] = [0, 0]
+                resp_dict[period]['open']  = [0, 0]
+                resp_dict[period]['mean']  = [0, 0]
 
         return resp_dict
 

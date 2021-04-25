@@ -44,7 +44,7 @@ from libs.logger import log_tabler
 data = {
     'mlb': dict(sport='baseball',   country='usa',   league='mlb',    seas_year='2018'),
     'lba': dict(sport='basketball', country='italy', league='lega-a', seas_year='2018-2019'),
-    'nba': dict(sport='basketball', country='usa',   league='nba',    seas_year='2018-2019'),
+    'nba': dict(sport='basketball', country='usa',   league='nba',    seas_year='2020-2021'),
     'nhl': dict(sport='hockey',     country='usa',   league='nhl',    seas_year='2018-2019')}
 
 args = docopt(__doc__, version='0.1')
@@ -69,7 +69,7 @@ for page_numb in range(first, last):
     """
     tmpl_template = 'https://www.oddsportal.com/{}/{}/{}{}/results/#/page/{}/'
     # current .../usa/nba/... or .../usa/nba-2016-2017/...
-    seas_tmpl = '' if seas in ['2018', '2018-2019'] else '-' + seas
+    seas_tmpl = '' if seas in ['2020', '2020-2021'] else '-' + seas
     link = tmpl_template.format(meta['sport'], meta['country'], meta['league'], seas_tmpl, page_numb)
     print('line 65:', link)
 
@@ -150,6 +150,7 @@ for page_numb in range(first, last):
                 else:
                     rows = rowler(tag.contents)
                     # check if match is finished.
+                    print(rows)
                     if type(rows) is str:
                         log_tabler.info(rows)
                         continue

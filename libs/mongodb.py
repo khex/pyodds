@@ -6,8 +6,8 @@ cd 'C:/env/mongodb/'
 bin/mongod.exe --config mongodb.conf
 """
 import sys
-sys.path.append('C:/Users/khex/Code/pyodds/libs')
-
+#   path.append('C:/Users/khex/Code/pyodds/libs')
+sys.path.append('/home/khex/Code/pyodds/libs')
 from pymongo import MongoClient
 # import pymongo, bson
 # from bson.objectid import ObjectId
@@ -22,9 +22,15 @@ db = client['delta_test']
     DBUser  name: stavros pass: balalajka7
     Email: qm69@ua.fm
 """
+"""     MongoDB Atlass
+mongodb+srv://stavros:balalajka7@cluster0.62wbu.mongodb.net/test
+"""
 
 MONGODB_URI = "mongodb://stavros:balalajka7@ds057934.mongolab.com:57934/deltabase"
-client = MongoClient(MONGODB_URI)
+MONGO_ATLAS = "mongodb+srv://stavros:balalajka7@cluster0.62wbu.mongodb.net/deltabase"
+
+
+client = MongoClient(MONGO_ATLAS)
 db = client.get_default_database()
 
 

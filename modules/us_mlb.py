@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append("C:/Users/khex/Code/pyodds/libs")
+#   path.append("C:/Users/khex/Code/pyodds/libs")
+sys.path.append('/home/khex/Code/pyodds/libs')
 
 from mongodb import modules
 from mongodb import teams
